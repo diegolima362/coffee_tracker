@@ -67,6 +67,14 @@ mixin _$AuthController on _AuthControllerBase, Store {
         .run(() => super.signUpWithEmail(email: email, password: password));
   }
 
+  final _$resetPasswordAsyncAction =
+      AsyncAction('_AuthControllerBase.resetPassword');
+
+  @override
+  Future<dynamic> resetPassword(String email) {
+    return _$resetPasswordAsyncAction.run(() => super.resetPassword(email));
+  }
+
   final _$_AuthControllerBaseActionController =
       ActionController(name: '_AuthControllerBase');
 
@@ -76,6 +84,17 @@ mixin _$AuthController on _AuthControllerBase, Store {
         name: '_AuthControllerBase.setUser');
     try {
       return super.setUser(value);
+    } finally {
+      _$_AuthControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> logout() {
+    final _$actionInfo = _$_AuthControllerBaseActionController.startAction(
+        name: '_AuthControllerBase.logout');
+    try {
+      return super.logout();
     } finally {
       _$_AuthControllerBaseActionController.endAction(_$actionInfo);
     }

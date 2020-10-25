@@ -8,4 +8,7 @@ abstract class IAuthRepository implements Disposable {
   Future<String> getToken();
   Future getLogout();
   Stream<User> getUser();
+  Future<void> resetPassword(String email);
+  bool emailVerified();
+  Future<bool> validateCode(String code);
 }

@@ -12,6 +12,11 @@ class AuthController = _AuthControllerBase with _$AuthController;
 abstract class _AuthControllerBase with Store {
   final IAuthRepository _authRepository = Modular.get();
 
+  bool get isEmailVerified => _authRepository.emailVerified();
+
+  Future<bool> validateCode(String code) async =>
+      await _authRepository.validateCode(code);
+
   @observable
   AuthStatus status = AuthStatus.loading;
 
@@ -36,8 +41,12 @@ abstract class _AuthControllerBase with Store {
     try {
       user = await _authRepository.getGoogleLogin();
       status = AuthStatus.loggedOn;
+    } on PlatformException {
+      status = AuthStatus.loggedOut;
+      rethrow;
     } catch (e) {
       status = AuthStatus.loggedOut;
+      rethrow;
     }
   }
 
@@ -47,6 +56,7 @@ abstract class _AuthControllerBase with Store {
     @required String password,
   }) async {
     status = AuthStatus.loading;
+
     try {
       user = await _authRepository.getEmailPasswordLogin(
         email: email,
@@ -54,7 +64,6 @@ abstract class _AuthControllerBase with Store {
       );
       status = AuthStatus.loggedOn;
     } on PlatformException {
-      status = AuthStatus.loggedOut;
       rethrow;
     }
   }
@@ -77,6 +86,19 @@ abstract class _AuthControllerBase with Store {
     }
   }
 
+  @action
+  Future resetPassword(String email) async {
+    status = AuthStatus.loading;
+    try {
+      await _authRepository.resetPassword(email);
+      status = AuthStatus.loggedOut;
+    } on PlatformException {
+      status = AuthStatus.loggedOut;
+      rethrow;
+    }
+  }
+
+  @action
   Future logout() {
     return _authRepository.getLogout();
   }

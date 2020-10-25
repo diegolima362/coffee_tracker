@@ -1,4 +1,5 @@
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
+import 'package:flutter/services.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -18,10 +19,14 @@ abstract class _LoginControllerBase with Store {
     try {
       loading = true;
       await auth.loginWithGoogle();
-      Modular.to.pushReplacementNamed('/home');
-    } catch (e) {
+      if (auth.status == AuthStatus.loggedOn)
+        Modular.to.pushReplacementNamed('/home');
+    } on PlatformException {
       loading = false;
       rethrow;
+    } catch (e) {
+      loading = false;
+      print(e);
     }
   }
 

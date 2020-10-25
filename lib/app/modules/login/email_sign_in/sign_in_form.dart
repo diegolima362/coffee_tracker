@@ -1,10 +1,10 @@
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
+import 'package:coffee_tracker/app/utils/platform_alert_dialog.dart';
 import 'package:coffee_tracker/app/utils/platform_exception_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:validators/validators.dart';
 
 import 'form_store.dart';
 
@@ -97,19 +97,35 @@ class _SignInFormState extends State<SignInForm> {
                     ),
                   ),
                   SizedBox(height: 16.0),
-                  Observer(builder: (_) {
-                    return RaisedButton(
-                      child: Text(store.primaryButtonText),
-                      onPressed: store.canSubmit ? _submit : null,
-                    );
-                  }),
+                  Observer(
+                    builder: (_) {
+                      return RaisedButton(
+                        child: Text(store.primaryButtonText),
+                        onPressed: store.canSubmit ? _submit : null,
+                      );
+                    },
+                  ),
                   SizedBox(height: 8.0),
-                  Observer(builder: (_) {
-                    return FlatButton(
-                      child: Text(store.secondaryButtonText),
-                      onPressed: !store.loading ? _toggleFormType : null,
-                    );
-                  }),
+                  Observer(
+                    builder: (_) {
+                      return FlatButton(
+                        child: Text(store.secondaryButtonText),
+                        onPressed: !store.loading ? _toggleFormType : null,
+                      );
+                    },
+                  ),
+                  Observer(
+                    builder: (_) {
+                      return store.formType == SignFormType.signIn
+                          ? FlatButton(
+                              child: Text(
+                                'Esqueceu sua Senha? Clique para redefinir.',
+                              ),
+                              onPressed: _resetPassword,
+                            )
+                          : SizedBox(height: 20);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -133,8 +149,10 @@ class _SignInFormState extends State<SignInForm> {
   Future<void> _submit() async {
     try {
       await store.submit();
-      if (store.auth.status == AuthStatus.loggedOn) {
+      if (store.auth.status == AuthStatus.loggedOn && store.isEmailVerified) {
         Modular.to.pushReplacementNamed('/home');
+      } else if (!store.isEmailVerified) {
+        _validateEmail();
       }
     } on PlatformException catch (e) {
       PlatformExceptionAlertDialog(
@@ -142,5 +160,18 @@ class _SignInFormState extends State<SignInForm> {
         exception: e,
       ).show(context);
     }
+  }
+
+  Future<bool> _validateEmail() async {
+    return await PlatformAlertDialog(
+      title: 'Email não verificado',
+      content: 'Acesse o seu email e siga os passos '
+          'para validar o seu email.',
+      defaultActionText: 'OK',
+    ).show(context);
+  }
+
+  Future<void> _resetPassword() async {
+    store.resetPassword();
   }
 }

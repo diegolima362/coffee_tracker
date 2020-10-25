@@ -1,6 +1,8 @@
 import 'package:coffee_tracker/app/modules/login/components/sign_in_button.dart';
 import 'package:coffee_tracker/app/modules/login/components/social_sign_in_button.dart';
+import 'package:coffee_tracker/app/utils/platform_exception_alert_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -15,6 +17,17 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends ModularState<LoginPage, LoginController> {
+  Future<void> _googleSignIn() async {
+    try {
+      await controller.loginWithGoogle();
+    } on PlatformException catch (e) {
+      PlatformExceptionAlertDialog(
+        exception: e,
+        title: 'Erro ao fazer Login',
+      ).show(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,8 +47,7 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
                 child: _buildHeader(),
               ),
               SocialSignInButton(
-                onPressed:
-                    controller.loading ? null : controller.loginWithGoogle,
+                onPressed: controller.loading ? null : _googleSignIn,
                 text: controller.loading ? 'Entrando' : 'Entrar com Google',
                 assetName: 'images/google-logo.png',
               ),

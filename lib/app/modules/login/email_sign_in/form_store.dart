@@ -130,6 +130,17 @@ abstract class _FormStore with Store {
       loading = false;
     }
   }
+
+  bool get isEmailVerified => auth.isEmailVerified;
+
+  Future<bool> validateCode(String code) async => await auth.validateCode(code);
+
+  void resetPassword() {
+    Modular.to.pushReplacementNamed(
+      '/login/email_sign_in/reset_password',
+      arguments: auth,
+    );
+  }
 }
 
 class FormErrorState = _FormErrorState with _$FormErrorState;
