@@ -64,7 +64,7 @@ class _SignInFormState extends State<SignInForm> {
                     builder: (_) => TextField(
                       controller: _emailController,
                       focusNode: _emailFocusNode,
-                      onChanged: (value) => store.email = value,
+                      onChanged: (value) => store.email = value.trim(),
                       onEditingComplete: () => _emailEditingComplete(),
                       decoration: InputDecoration(
                         labelText: 'Email',

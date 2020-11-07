@@ -5,6 +5,7 @@ import 'package:mobx/mobx.dart';
 
 class LandingPage extends StatefulWidget {
   final String title;
+
   const LandingPage({Key key, this.title = "Landing"}) : super(key: key);
 
   @override

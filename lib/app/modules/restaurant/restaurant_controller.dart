@@ -1,12 +1,13 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
-part 'app_controller.g.dart';
+part 'restaurant_controller.g.dart';
 
 @Injectable()
-class AppController = _AppControllerBase with _$AppController;
+class RestaurantController = _RestaurantControllerBase
+    with _$RestaurantController;
 
-abstract class _AppControllerBase with Store {
+abstract class _RestaurantControllerBase with Store {
   @observable
   int value = 0;
 

@@ -11,6 +11,7 @@ import 'app_controller.dart';
 import 'app_widget.dart';
 import 'modules/home/home_module.dart';
 import 'modules/login/login_module.dart';
+import 'modules/settings/settings_module.dart';
 
 class AppModule extends MainModule {
   @override
@@ -30,6 +31,7 @@ class AppModule extends MainModule {
           transition: TransitionType.noTransition,
         ),
         ModularRouter('/home', module: HomeModule()),
+        ModularRouter('/settings', module: SettingsModule()),
       ];
 
   @override
