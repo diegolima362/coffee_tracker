@@ -19,26 +19,26 @@ final $ReviewController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$ReviewController on _ReviewControllerBase, Store {
-  Computed<Future<List<ReviewModel>>> _$reviewsComputed;
+  Computed<Future<List<ReviewModel>>> _$allReviewsComputed;
 
   @override
-  Future<List<ReviewModel>> get reviews => (_$reviewsComputed ??=
-          Computed<Future<List<ReviewModel>>>(() => super.reviews,
-              name: '_ReviewControllerBase.reviews'))
+  Future<List<ReviewModel>> get allReviews => (_$allReviewsComputed ??=
+          Computed<Future<List<ReviewModel>>>(() => super.allReviews,
+              name: '_ReviewControllerBase.allReviews'))
       .value;
 
-  final _$_reviewsAtom = Atom(name: '_ReviewControllerBase._reviews');
+  final _$reviewsAtom = Atom(name: '_ReviewControllerBase.reviews');
 
   @override
-  List<ReviewModel> get _reviews {
-    _$_reviewsAtom.reportRead();
-    return super._reviews;
+  List<ReviewModel> get reviews {
+    _$reviewsAtom.reportRead();
+    return super.reviews;
   }
 
   @override
-  set _reviews(List<ReviewModel> value) {
-    _$_reviewsAtom.reportWrite(value, super._reviews, () {
-      super._reviews = value;
+  set reviews(List<ReviewModel> value) {
+    _$reviewsAtom.reportWrite(value, super.reviews, () {
+      super.reviews = value;
     });
   }
 
@@ -53,7 +53,8 @@ mixin _$ReviewController on _ReviewControllerBase, Store {
   @override
   String toString() {
     return '''
-reviews: ${reviews}
+reviews: ${reviews},
+allReviews: ${allReviews}
     ''';
   }
 }

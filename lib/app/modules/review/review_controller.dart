@@ -14,35 +14,23 @@ abstract class _ReviewControllerBase with Store {
   }
 
   @observable
-  List<ReviewModel> _reviews;
+  List<ReviewModel> reviews;
 
   @action
   Future<void> _loadReviews() async {
     final ILocalStorage storage = Modular.get();
-    _reviews = await storage.getAllReviews();
+    reviews = await storage.getAllReviews();
   }
 
   @computed
-  Future<List<ReviewModel>> get reviews async {
-    if (_reviews == null) {
+  Future<List<ReviewModel>> get allReviews async {
+    if (reviews == null) {
       final ILocalStorage storage = Modular.get();
-      _reviews = await storage.getAllReviews();
+      reviews = await storage.getAllReviews();
     }
 
-    _reviews.sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
+    reviews.sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
 
-    return _reviews;
-  }
-
-  @computed
-  Future<List<ReviewModel>> get last async {
-    if (_reviews == null) {
-      final ILocalStorage storage = Modular.get();
-      _reviews = await storage.getAllReviews();
-    }
-
-    _reviews.sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
-
-    return _reviews.reversed.toList().sublist(0, 5);
+    return reviews;
   }
 }

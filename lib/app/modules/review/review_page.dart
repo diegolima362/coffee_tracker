@@ -19,73 +19,38 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      initialIndex: 0,
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          bottom: TabBar(
-            tabs: <Widget>[
-              Tab(child: Text('Recentes')),
-              Tab(child: Text('Todas')),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () {
-            print('add review');
-          },
-        ),
-        body: TabBarView(
-          children: [
-            FutureBuilder<List<ReviewModel>>(
-              future: controller.last,
-              builder: (context, snapshot) {
-                return ListItemsBuilder<ReviewModel>(
-                  snapshot: snapshot,
-                  itemBuilder: (BuildContext context, item) {
-                    return ListTile(
-                      title: Text('${item.restaurantName}'),
-                      subtitle: Text('${item.reviewDate}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${item.rate}'),
-                          SizedBox(width: 2),
-                          Icon(Icons.star, size: 16),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-            FutureBuilder<List<ReviewModel>>(
-              future: controller.reviews,
-              builder: (context, snapshot) {
-                return ListItemsBuilder<ReviewModel>(
-                  snapshot: snapshot,
-                  itemBuilder: (BuildContext context, item) {
-                    return ListTile(
-                      title: Text('${item.restaurantName}'),
-                      subtitle: Text('${item.reviewDate}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${item.rate}'),
-                          SizedBox(width: 2),
-                          Icon(Icons.star, size: 16),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          print('add review');
+        },
+      ),
+      body: FutureBuilder<List<ReviewModel>>(
+        future: controller.allReviews,
+        builder: (context, snapshot) {
+          return ListItemsBuilder<ReviewModel>(
+            snapshot: snapshot,
+            itemBuilder: (BuildContext context, item) {
+              return Card(
+                margin: EdgeInsets.only(bottom: 5),
+                child: ListTile(
+                  title: Text('${item.restaurantName}'),
+                  subtitle: Text('${item.reviewDate}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('${item.rate}'),
+                      SizedBox(width: 2),
+                      Icon(Icons.star, size: 16),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
