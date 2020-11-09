@@ -3,13 +3,15 @@ import 'package:flutter/foundation.dart';
 
 class RestaurantModel {
   final int id;
+
+  double rate;
+
   String name;
   String address;
   String city;
   String state;
 
-  String openTime;
-  String closeTime;
+  String openDays;
 
   String photoURL;
 
@@ -21,9 +23,9 @@ class RestaurantModel {
     @required this.address,
     @required this.city,
     @required this.state,
+    this.rate,
     this.photoURL,
-    this.closeTime,
-    this.openTime,
+    this.openDays,
   }) {
     _reviews = List<ReviewModel>();
   }
@@ -40,8 +42,8 @@ class RestaurantModel {
       city: json['city'],
       state: json['state'],
       photoURL: json['photoURL'],
-      closeTime: json['closeTime'],
-      openTime: json['openTime'],
+      openDays: json['openDays'],
+      rate: json['rate'],
     );
   }
 
@@ -52,7 +54,7 @@ class RestaurantModel {
         'city': city,
         'state': state,
         'photoURL': photoURL,
-        'closeTime': closeTime,
-        'openTime': openTime,
+        'openDays': openDays,
+        'rate': rate,
       };
 }

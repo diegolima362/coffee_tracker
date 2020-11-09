@@ -42,7 +42,6 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     return Observer(builder: (_) {
       return BottomNavigationBar(
         showSelectedLabels: true,
-        backgroundColor: Theme.of(context).primaryColor,
         type: BottomNavigationBarType.fixed,
         currentIndex: controller.currentIndex,
         onTap: (index) {

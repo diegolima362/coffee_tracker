@@ -7,18 +7,13 @@ import 'profile_controller.dart';
 class ProfilePage extends StatefulWidget {
   final String title;
 
-  const ProfilePage({Key key, this.title = "Profile"}) : super(key: key);
+  const ProfilePage({Key key, this.title = "Perfil"}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends ModularState<ProfilePage, ProfileController> {
-  List widgetOptions = [
-    Container(color: Colors.amber),
-    Container(color: Colors.pink),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

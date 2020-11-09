@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'empty_content.dart';
@@ -9,6 +10,7 @@ typedef ItemWidgetBuilder<T> = Widget Function(BuildContext context, T item);
 class ListItemsBuilder<T> extends StatelessWidget {
   final AsyncSnapshot<List<T>> snapshot;
   final ItemWidgetBuilder<T> itemBuilder;
+  final bool horizontal;
   final String emptyTitle;
   final String emptyMessage;
   final String errorMessage;
@@ -20,6 +22,7 @@ class ListItemsBuilder<T> extends StatelessWidget {
     @required this.snapshot,
     @required this.itemBuilder,
     this.filter,
+    this.horizontal = false,
     this.emptyMessage,
     this.emptyTitle,
     this.emptyWidget,
@@ -55,6 +58,7 @@ class ListItemsBuilder<T> extends StatelessWidget {
     }
 
     return ListView.builder(
+      scrollDirection: horizontal ? Axis.horizontal : Axis.vertical,
       padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8.0),
       itemCount: items.length,
       itemBuilder: (context, index) => itemBuilder(context, items[index]),
