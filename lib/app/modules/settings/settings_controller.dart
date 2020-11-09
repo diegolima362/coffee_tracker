@@ -1,4 +1,6 @@
+import 'package:coffee_tracker/app/app_controller.dart';
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
+import 'package:coffee_tracker/app/shared/repositories/local_storage/local_storage_interface.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -9,11 +11,14 @@ class SettingsController = _SettingsControllerBase with _$SettingsController;
 
 abstract class _SettingsControllerBase with Store {
   @observable
-  int value = 0;
+  bool dark = Modular.get<AppController>().isDark;
 
   @action
-  void increment() {
-    value++;
+  Future<void> setDark(bool dark) async {
+    this.dark = dark;
+    final ILocalStorage storage = Modular.get();
+    await storage.setDarkMode(dark);
+    await Modular.get<AppController>().loadTheme();
   }
 
   @action
