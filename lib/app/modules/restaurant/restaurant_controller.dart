@@ -15,35 +15,23 @@ abstract class _RestaurantControllerBase with Store {
   }
 
   @observable
-  List<RestaurantModel> _restaurants;
+  List<RestaurantModel> restaurants;
 
   @action
   Future<void> _loadRestaurants() async {
     final ILocalStorage storage = Modular.get();
-    _restaurants = await storage.getAllRestaurants();
+    restaurants = await storage.getAllRestaurants();
   }
 
   @computed
-  Future<List<RestaurantModel>> get restaurants async {
-    if (_restaurants == null) {
+  Future<List<RestaurantModel>> get allRestaurants async {
+    if (restaurants == null) {
       final ILocalStorage storage = Modular.get();
-      _restaurants = await storage.getAllRestaurants();
+      restaurants = await storage.getAllRestaurants();
     }
 
-    _restaurants.sort((a, b) => a.name.compareTo(b.name));
+    restaurants.sort((a, b) => a.name.compareTo(b.name));
 
-    return _restaurants;
-  }
-
-  @computed
-  Future<List<RestaurantModel>> get favorites async {
-    if (_restaurants == null) {
-      final ILocalStorage storage = Modular.get();
-      _restaurants = await storage.getAllRestaurants();
-    }
-
-    _restaurants.sort((a, b) => a.rate.compareTo(b.rate));
-
-    return _restaurants.reversed.toList().sublist(0, 5);
+    return restaurants;
   }
 }

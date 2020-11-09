@@ -19,27 +19,27 @@ final $RestaurantController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$RestaurantController on _RestaurantControllerBase, Store {
-  Computed<Future<List<RestaurantModel>>> _$restaurantsComputed;
+  Computed<Future<List<RestaurantModel>>> _$allRestaurantsComputed;
 
   @override
-  Future<List<RestaurantModel>> get restaurants => (_$restaurantsComputed ??=
-          Computed<Future<List<RestaurantModel>>>(() => super.restaurants,
-              name: '_RestaurantControllerBase.restaurants'))
-      .value;
+  Future<List<RestaurantModel>> get allRestaurants =>
+      (_$allRestaurantsComputed ??= Computed<Future<List<RestaurantModel>>>(
+              () => super.allRestaurants,
+              name: '_RestaurantControllerBase.allRestaurants'))
+          .value;
 
-  final _$_restaurantsAtom =
-      Atom(name: '_RestaurantControllerBase._restaurants');
+  final _$restaurantsAtom = Atom(name: '_RestaurantControllerBase.restaurants');
 
   @override
-  List<RestaurantModel> get _restaurants {
-    _$_restaurantsAtom.reportRead();
-    return super._restaurants;
+  List<RestaurantModel> get restaurants {
+    _$restaurantsAtom.reportRead();
+    return super.restaurants;
   }
 
   @override
-  set _restaurants(List<RestaurantModel> value) {
-    _$_restaurantsAtom.reportWrite(value, super._restaurants, () {
-      super._restaurants = value;
+  set restaurants(List<RestaurantModel> value) {
+    _$restaurantsAtom.reportWrite(value, super.restaurants, () {
+      super.restaurants = value;
     });
   }
 
@@ -54,7 +54,8 @@ mixin _$RestaurantController on _RestaurantControllerBase, Store {
   @override
   String toString() {
     return '''
-restaurants: ${restaurants}
+restaurants: ${restaurants},
+allRestaurants: ${allRestaurants}
     ''';
   }
 }

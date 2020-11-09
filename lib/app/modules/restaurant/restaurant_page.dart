@@ -3,6 +3,7 @@ import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import 'components/restaurant_info_card.dart';
 import 'restaurant_controller.dart';
 
 class RestaurantPage extends StatefulWidget {
@@ -20,98 +21,34 @@ class _RestaurantPageState
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      initialIndex: 0,
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          bottom: TabBar(
-            tabs: <Widget>[
-              Tab(child: Text('Favoritos')),
-              Tab(child: Text('Todos')),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () {
-            print('add restaurant');
-          },
-        ),
-        body: TabBarView(
-          children: [
-            Column(
-              children: [
-                Container(height: 150),
-                Container(
-                  height: 200,
-                  child: FutureBuilder<List<RestaurantModel>>(
-                    future: controller.favorites,
-                    builder: (context, snapshot) {
-                      return ListItemsBuilder<RestaurantModel>(
-                        horizontal: true,
-                        snapshot: snapshot,
-                        itemBuilder: (BuildContext context, item) {
-                          return Card(
-                            child: Container(
-                              width: 200,
-                              height: 100,
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                    title: Text('${item.name}'),
-                                    subtitle: Text('${item.city}, ${item.state}'),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('${item.rate}'),
-                                        SizedBox(width: 2),
-                                        Icon(Icons.star, size: 16),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Expanded(child: Container()),
-              ],
-            ),
-            _all(),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          print('add restaurant');
+        },
       ),
-    );
-  }
-
-  Widget _all() {
-    return FutureBuilder<List<RestaurantModel>>(
-      future: controller.restaurants,
-      builder: (context, snapshot) {
-        return ListItemsBuilder<RestaurantModel>(
-          snapshot: snapshot,
-          itemBuilder: (BuildContext context, item) {
-            return ListTile(
-              title: Text('${item.name}'),
-              subtitle: Text('${item.city}, ${item.state}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('${item.rate}'),
-                  SizedBox(width: 2),
-                  Icon(Icons.star, size: 16),
-                ],
-              ),
+      body: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: FutureBuilder<List<RestaurantModel>>(
+          future: controller.allRestaurants,
+          builder: (context, snapshot) {
+            return ListItemsBuilder<RestaurantModel>(
+              snapshot: snapshot,
+              itemBuilder: (BuildContext context, item) {
+                return RestaurantInfoCard(
+                  restaurant: item,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height*0.1,
+                  radius:5.0,
+                  expanded: true,
+                );
+              },
             );
           },
-        );
-      },
+        ),
+      ),
     );
   }
 }
