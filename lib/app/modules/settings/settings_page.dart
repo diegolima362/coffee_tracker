@@ -53,6 +53,7 @@ class _SettingsPageState
                 title: Text('Modo escuro'),
                 trailing: Observer(
                   builder: (_) => CustomSwitch(
+                    activeColor: Theme.of(context).accentColor,
                     value: controller.dark,
                     onChanged: controller.setDark,
                   ),

@@ -19,6 +19,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends ModularState<HomePage, HomeController> {
+  bool dialVisible = true;
+
   List widgetOptions = [
     HomeContentPage(),
     RestaurantModule(),
@@ -48,11 +50,22 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
           controller.updateCurrentIndex(index);
         },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Cafés'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.text_snippet), label: 'Reviews'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.store),
+            label: 'Cafés',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.text_snippet),
+            label: 'Reviews',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
         ],
       );
     });

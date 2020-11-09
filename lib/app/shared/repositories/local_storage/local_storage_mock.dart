@@ -32,7 +32,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "Av Sete de Setembro 1865",
       "city": "Curitiba",
       "state": "PR",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "ter - dom"
     },
     {
@@ -42,7 +42,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "Av das Americas 3255, Tijuca",
       "city": "Rio de Janeiro",
       "state": "RJ",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - dom"
     },
     {
@@ -52,7 +52,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "AL Lorena 1682 Cerqueira Cesar",
       "city": "São Paulo",
       "state": "SP",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - dom"
     },
     {
@@ -62,7 +62,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "ESTR do Encanamento 323 Loja 3",
       "city": "Recife",
       "state": "PE",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "ter - dom"
     },
     {
@@ -72,7 +72,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "AV Abdias de Carvalho, 1142",
       "city": "Recife",
       "state": "PE",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - sab"
     },
     {
@@ -81,8 +81,8 @@ class LocalStorageMock implements ILocalStorage {
       "rate": 4.0,
       "address": "AV Governador Flavio Ribeiro Coutinho 115 Manaira",
       "city": "João Pessoa",
-      "state": "PA",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "state": "PB",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - sab"
     },
     {
@@ -92,7 +92,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "R Maria Carolina 315 Boa Viagem",
       "city": "Recife",
       "state": "PE",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - dom"
     },
     {
@@ -102,7 +102,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "R Duque de Caxias 630 Alto Branco",
       "city": "Campina Grande",
       "state": "PB",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - sab"
     },
     {
@@ -112,7 +112,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "R Joao Cancio Numero 969",
       "city": "João Pessoa",
       "state": "PB",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "ter - qui"
     },
     {
@@ -122,7 +122,7 @@ class LocalStorageMock implements ILocalStorage {
       "address": "R Nossa Sra. dos Navegantes",
       "city": "João Pessoa",
       "state": "PB",
-      "photoURL": "https://picsum.photos/seed/picsum/300/300",
+      "photoURL": "https://picsum.photos/300/300",
       "openDays": "seg - dom"
     }
   ];

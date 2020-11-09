@@ -7,7 +7,6 @@ import 'app_widget.dart';
 import 'modules/home/home_module.dart';
 import 'modules/landing/landing_page.dart';
 import 'modules/login/login_module.dart';
-import 'modules/settings/settings_module.dart';
 import 'shared/auth/auth_controller.dart';
 import 'shared/auth/repositories/auth_repository.dart';
 import 'shared/repositories/storage/storage_repository.dart';
@@ -30,8 +29,11 @@ class AppModule extends MainModule {
           module: LoginModule(),
           transition: TransitionType.noTransition,
         ),
-        ModularRouter('/home', module: HomeModule()),
-        ModularRouter('/settings', module: SettingsModule()),
+        ModularRouter(
+          '/home',
+          module: HomeModule(),
+          transition: TransitionType.noTransition,
+        ),
       ];
 
   @override
