@@ -19,39 +19,42 @@ final $RestaurantController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$RestaurantController on _RestaurantControllerBase, Store {
-  final _$valueAtom = Atom(name: '_RestaurantControllerBase.value');
+  Computed<Future<List<RestaurantModel>>> _$restaurantsComputed;
 
   @override
-  int get value {
-    _$valueAtom.reportRead();
-    return super.value;
+  Future<List<RestaurantModel>> get restaurants => (_$restaurantsComputed ??=
+          Computed<Future<List<RestaurantModel>>>(() => super.restaurants,
+              name: '_RestaurantControllerBase.restaurants'))
+      .value;
+
+  final _$_restaurantsAtom =
+      Atom(name: '_RestaurantControllerBase._restaurants');
+
+  @override
+  List<RestaurantModel> get _restaurants {
+    _$_restaurantsAtom.reportRead();
+    return super._restaurants;
   }
 
   @override
-  set value(int value) {
-    _$valueAtom.reportWrite(value, super.value, () {
-      super.value = value;
+  set _restaurants(List<RestaurantModel> value) {
+    _$_restaurantsAtom.reportWrite(value, super._restaurants, () {
+      super._restaurants = value;
     });
   }
 
-  final _$_RestaurantControllerBaseActionController =
-      ActionController(name: '_RestaurantControllerBase');
+  final _$_loadRestaurantsAsyncAction =
+      AsyncAction('_RestaurantControllerBase._loadRestaurants');
 
   @override
-  void increment() {
-    final _$actionInfo = _$_RestaurantControllerBaseActionController
-        .startAction(name: '_RestaurantControllerBase.increment');
-    try {
-      return super.increment();
-    } finally {
-      _$_RestaurantControllerBaseActionController.endAction(_$actionInfo);
-    }
+  Future<void> _loadRestaurants() {
+    return _$_loadRestaurantsAsyncAction.run(() => super._loadRestaurants());
   }
 
   @override
   String toString() {
     return '''
-value: ${value}
+restaurants: ${restaurants}
     ''';
   }
 }
