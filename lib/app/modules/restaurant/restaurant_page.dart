@@ -2,6 +2,7 @@ import 'package:coffee_tracker/app/shared/components/list_items_builder.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'components/restaurant_info_card.dart';
 import 'restaurant_controller.dart';
@@ -22,7 +23,21 @@ class _RestaurantPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: Icon(FontAwesomeIcons.search),
+            iconSize: 18,
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: controller.searchDelegate,
+              );
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
@@ -38,10 +53,11 @@ class _RestaurantPageState
               snapshot: snapshot,
               itemBuilder: (BuildContext context, item) {
                 return RestaurantInfoCard(
+                  onTap: () => controller.showDetails(restaurant: item),
                   restaurant: item,
                   width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height*0.1,
-                  radius:5.0,
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  radius: 5.0,
                   expanded: true,
                 );
               },

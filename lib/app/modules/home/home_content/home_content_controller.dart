@@ -63,4 +63,9 @@ abstract class _HomeContentBase with Store {
 
     return _restaurants.reversed.toList().sublist(0, 5);
   }
+
+  @action
+  void showDetails(RestaurantModel restaurant) {
+    Modular.to.pushNamed('/restaurant/detail', arguments: restaurant);
+  }
 }

@@ -26,6 +26,7 @@ class AppWidget extends StatelessWidget {
           navigatorKey: Modular.navigatorKey,
           title: 'Coffee Tracker',
           theme: controller.themeType,
+          themeMode: controller.themeMode,
           initialRoute: '/',
           onGenerateRoute: Modular.generateRoute,
         ),

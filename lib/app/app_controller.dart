@@ -17,6 +17,9 @@ abstract class _AppControllerBase with Store {
   @observable
   ThemeData themeType;
 
+  @observable
+  ThemeMode themeMode;
+
   @computed
   bool get isDark => themeType.brightness == Brightness.dark;
 
@@ -27,8 +30,10 @@ abstract class _AppControllerBase with Store {
 
     if (prefs) {
       themeType = ThemeData.dark();
+      themeMode = ThemeMode.dark;
     } else {
       themeType = ThemeData.light();
+      themeMode = ThemeMode.light;
     }
   }
 }

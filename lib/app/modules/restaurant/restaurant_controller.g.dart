@@ -43,18 +43,48 @@ mixin _$RestaurantController on _RestaurantControllerBase, Store {
     });
   }
 
-  final _$_loadRestaurantsAsyncAction =
-      AsyncAction('_RestaurantControllerBase._loadRestaurants');
+  final _$isDarkAtom = Atom(name: '_RestaurantControllerBase.isDark');
 
   @override
-  Future<void> _loadRestaurants() {
-    return _$_loadRestaurantsAsyncAction.run(() => super._loadRestaurants());
+  bool get isDark {
+    _$isDarkAtom.reportRead();
+    return super.isDark;
+  }
+
+  @override
+  set isDark(bool value) {
+    _$isDarkAtom.reportWrite(value, super.isDark, () {
+      super.isDark = value;
+    });
+  }
+
+  final _$_loadDataAsyncAction =
+      AsyncAction('_RestaurantControllerBase._loadData');
+
+  @override
+  Future<void> _loadData() {
+    return _$_loadDataAsyncAction.run(() => super._loadData());
+  }
+
+  final _$_RestaurantControllerBaseActionController =
+      ActionController(name: '_RestaurantControllerBase');
+
+  @override
+  void showDetails({@required RestaurantModel restaurant}) {
+    final _$actionInfo = _$_RestaurantControllerBaseActionController
+        .startAction(name: '_RestaurantControllerBase.showDetails');
+    try {
+      return super.showDetails(restaurant: restaurant);
+    } finally {
+      _$_RestaurantControllerBaseActionController.endAction(_$actionInfo);
+    }
   }
 
   @override
   String toString() {
     return '''
 restaurants: ${restaurants},
+isDark: ${isDark},
 allRestaurants: ${allRestaurants}
     ''';
   }

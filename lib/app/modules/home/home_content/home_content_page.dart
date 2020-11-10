@@ -71,6 +71,7 @@ class _HomeContentPageState
           itemBuilder: (BuildContext context, item) {
             return RestaurantInfoCard(
               restaurant: item,
+              onTap: () => controller.showDetails(item),
             );
           },
         );

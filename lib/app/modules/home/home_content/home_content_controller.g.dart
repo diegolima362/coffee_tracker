@@ -100,6 +100,17 @@ mixin _$HomeContentController on _HomeContentBase, Store {
   }
 
   @override
+  void showDetails(RestaurantModel restaurant) {
+    final _$actionInfo = _$_HomeContentBaseActionController.startAction(
+        name: '_HomeContentBase.showDetails');
+    try {
+      return super.showDetails(restaurant);
+    } finally {
+      _$_HomeContentBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 value: ${value},
