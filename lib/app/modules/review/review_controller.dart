@@ -1,5 +1,6 @@
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/local_storage/local_storage_interface.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -10,27 +11,37 @@ class ReviewController = _ReviewControllerBase with _$ReviewController;
 
 abstract class _ReviewControllerBase with Store {
   _ReviewControllerBase() {
-    _loadReviews();
+    loadReviews();
   }
 
   @observable
-  List<ReviewModel> reviews;
+  bool isLoading;
+
+  @observable
+  ObservableList<ReviewModel> reviews;
 
   @action
-  Future<void> _loadReviews() async {
+  Future<void> loadReviews() async {
+    reviews = ObservableList<ReviewModel>();
+
+    isLoading = true;
     final ILocalStorage storage = Modular.get();
-    reviews = await storage.getAllReviews();
+    reviews.addAll(await storage.getAllReviews());
+
+    reviews.reversed
+        .toList()
+        .sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
+
+    isLoading = false;
   }
 
-  @computed
-  Future<List<ReviewModel>> get allReviews async {
-    if (reviews == null) {
-      final ILocalStorage storage = Modular.get();
-      reviews = await storage.getAllReviews();
-    }
+  @action
+  void showDetails({@required ReviewModel review}) {
+    Modular.to.pushNamed('review/details', arguments: review);
+  }
 
-    reviews.sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
-
-    return reviews;
+  @action
+  void addReview() {
+    Modular.to.pushNamed('review/edit', arguments: null);
   }
 }

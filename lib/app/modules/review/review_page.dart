@@ -1,6 +1,7 @@
-import 'package:coffee_tracker/app/shared/components/list_items_builder.dart';
-import 'package:coffee_tracker/app/shared/models/review_model.dart';
+import 'package:coffee_tracker/app/shared/components/empty_content.dart';
+import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'review_controller.dart';
@@ -22,36 +23,54 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Adicionar Review',
         child: Icon(Icons.add),
-        onPressed: () {
-          print('add review');
-        },
+        onPressed: controller.addReview,
       ),
-      body: FutureBuilder<List<ReviewModel>>(
-        future: controller.allReviews,
-        builder: (context, snapshot) {
-          return ListItemsBuilder<ReviewModel>(
-            snapshot: snapshot,
-            itemBuilder: (BuildContext context, item) {
-              return Card(
-                margin: EdgeInsets.only(bottom: 5),
-                child: ListTile(
-                  title: Text('${item.restaurantName}'),
-                  subtitle: Text('${item.reviewDate}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('${item.rate}'),
-                      SizedBox(width: 2),
-                      Icon(Icons.star, size: 16),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+      body: Observer(
+        builder: _buildContent,
       ),
     );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (controller.isLoading) {
+      return Center(child: CircularProgressIndicator());
+    } else if (controller.reviews.isEmpty) {
+      return EmptyContent(
+        title: 'Nada por aqui',
+        message: 'Sem Reviews Registradas',
+      );
+    } else {
+      return ListView.builder(
+        padding: EdgeInsets.all(8),
+        itemCount: controller.reviews.length,
+        itemBuilder: (context, index) {
+          final item = controller.reviews[index];
+          return GestureDetector(
+            onTap: () => controller.showDetails(review: item),
+            child: Card(
+              margin: EdgeInsets.only(bottom: 5),
+              child: ListTile(
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 1,
+                  horizontal: 4,
+                ),
+                title: Text('${item.restaurantName}'),
+                subtitle: Text(Format.date(item.reviewDate)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('${item.rate}'),
+                    SizedBox(width: 2),
+                    Icon(Icons.star, size: 16),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 }

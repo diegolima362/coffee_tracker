@@ -19,42 +19,74 @@ final $ReviewController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$ReviewController on _ReviewControllerBase, Store {
-  Computed<Future<List<ReviewModel>>> _$allReviewsComputed;
+  final _$isLoadingAtom = Atom(name: '_ReviewControllerBase.isLoading');
 
   @override
-  Future<List<ReviewModel>> get allReviews => (_$allReviewsComputed ??=
-          Computed<Future<List<ReviewModel>>>(() => super.allReviews,
-              name: '_ReviewControllerBase.allReviews'))
-      .value;
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
+  }
+
+  @override
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
+      super.isLoading = value;
+    });
+  }
 
   final _$reviewsAtom = Atom(name: '_ReviewControllerBase.reviews');
 
   @override
-  List<ReviewModel> get reviews {
+  ObservableList<ReviewModel> get reviews {
     _$reviewsAtom.reportRead();
     return super.reviews;
   }
 
   @override
-  set reviews(List<ReviewModel> value) {
+  set reviews(ObservableList<ReviewModel> value) {
     _$reviewsAtom.reportWrite(value, super.reviews, () {
       super.reviews = value;
     });
   }
 
-  final _$_loadReviewsAsyncAction =
-      AsyncAction('_ReviewControllerBase._loadReviews');
+  final _$loadReviewsAsyncAction =
+      AsyncAction('_ReviewControllerBase.loadReviews');
 
   @override
-  Future<void> _loadReviews() {
-    return _$_loadReviewsAsyncAction.run(() => super._loadReviews());
+  Future<void> loadReviews() {
+    return _$loadReviewsAsyncAction.run(() => super.loadReviews());
+  }
+
+  final _$_ReviewControllerBaseActionController =
+      ActionController(name: '_ReviewControllerBase');
+
+  @override
+  void showDetails({@required ReviewModel review}) {
+    final _$actionInfo = _$_ReviewControllerBaseActionController.startAction(
+        name: '_ReviewControllerBase.showDetails');
+    try {
+      return super.showDetails(review: review);
+    } finally {
+      _$_ReviewControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void addReview() {
+    final _$actionInfo = _$_ReviewControllerBaseActionController.startAction(
+        name: '_ReviewControllerBase.addReview');
+    try {
+      return super.addReview();
+    } finally {
+      _$_ReviewControllerBaseActionController.endAction(_$actionInfo);
+    }
   }
 
   @override
   String toString() {
     return '''
-reviews: ${reviews},
-allReviews: ${allReviews}
+isLoading: ${isLoading},
+reviews: ${reviews}
     ''';
   }
 }

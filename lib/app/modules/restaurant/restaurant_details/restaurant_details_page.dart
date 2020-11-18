@@ -6,18 +6,18 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'restaurant_detail_controller.dart';
 
-class RestaurantDetailPage extends StatefulWidget {
+class RestaurantDetailsPage extends StatefulWidget {
   final RestaurantModel restaurant;
 
-  const RestaurantDetailPage({Key key, @required this.restaurant})
+  const RestaurantDetailsPage({Key key, @required this.restaurant})
       : super(key: key);
 
   @override
-  _RestaurantDetailPageState createState() => _RestaurantDetailPageState();
+  _RestaurantDetailsPageState createState() => _RestaurantDetailsPageState();
 }
 
-class _RestaurantDetailPageState
-    extends ModularState<RestaurantDetailPage, RestaurantDetailController> {
+class _RestaurantDetailsPageState
+    extends ModularState<RestaurantDetailsPage, RestaurantDetailsController> {
   //use 'controller' variable to access controller
 
   @override
