@@ -1,4 +1,5 @@
-import 'package:coffee_tracker/app/utils/platform_exception_alert_dialog.dart';
+import 'package:coffee_tracker/app/shared/components/platform_exception_alert_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -97,13 +98,54 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
   Future<void> _submit() async {
     try {
       await store.submit();
-      if (store.canDissmiss)
+      if (store.canDissmiss) {
+        await _showConfirmDialog();
         Modular.to.pushReplacementNamed('/login/email_sign_in');
+      }
     } on PlatformException catch (e) {
-      PlatformExceptionAlertDialog(
-        title: 'Erro ao enviar e-mail',
-        exception: e,
-      ).show(context);
+      if (!kIsWeb) {
+        PlatformExceptionAlertDialog(
+          title: 'Erro ao enviar e-mail',
+          exception: e,
+        ).show(context);
+      } else {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('Erro'),
+              content: Text(e.message),
+              actions: [
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
+  }
+
+  Future _showConfirmDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Email enviado'),
+          content: Text(
+              'Acesse o seu email e siga os passos para redefinir a sua senha'),
+          actions: [
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -13,15 +13,8 @@ class SocialSignInButton extends CustomRaisedButton {
         super(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                height: 40,
-                child: Image.asset(assetName),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-              ),
+            children: [
+              Container(child: Image.asset(assetName)),
               Text(
                 text,
                 style: TextStyle(
