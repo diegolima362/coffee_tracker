@@ -1,10 +1,10 @@
-import 'package:coffee_tracker/app/shared/components/list_items_builder.dart';
-import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
+import 'package:coffee_tracker/app/modules/restaurant/components/restaurant_info_card.dart';
+import 'package:coffee_tracker/app/modules/restaurant/sort_by.dart';
+import 'package:coffee_tracker/app/shared/components/empty_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'components/restaurant_info_card.dart';
 import 'restaurant_controller.dart';
 
 class RestaurantPage extends StatefulWidget {
@@ -27,8 +27,7 @@ class _RestaurantPageState
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: Icon(FontAwesomeIcons.search),
-            iconSize: 18,
+            icon: Icon(Icons.search),
             onPressed: () {
               showSearch(
                 context: context,
@@ -36,35 +35,69 @@ class _RestaurantPageState
               );
             },
           ),
+          buildPopupMenuButton()
         ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {
-          print('add restaurant');
-        },
+        tooltip: 'Adicionar Restaurante',
+        onPressed: controller.addRestaurant,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: FutureBuilder<List<RestaurantModel>>(
-          future: controller.allRestaurants,
-          builder: (context, snapshot) {
-            return ListItemsBuilder<RestaurantModel>(
-              snapshot: snapshot,
-              itemBuilder: (BuildContext context, item) {
-                return RestaurantInfoCard(
-                  onTap: () => controller.showDetails(restaurant: item),
-                  restaurant: item,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.1,
-                  radius: 5.0,
-                  expanded: true,
-                );
-              },
-            );
-          },
-        ),
+      body: Observer(
+        builder: _buildContent,
       ),
     );
+  }
+
+  Widget buildPopupMenuButton() {
+    return PopupMenuButton<SortBy>(
+      icon: Icon(Icons.sort_sharp),
+      onSelected: (value) => controller.sortBy(value),
+      itemBuilder: (BuildContext context) {
+        final choices = ['A-Z', 'Nota', 'Data', 'Cidade'];
+        return choices.map((String choice) {
+          return PopupMenuItem<SortBy>(
+            value: SortBy.values[choices.indexOf(choice)],
+            child: Text(choice),
+          );
+        }).toList();
+      },
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    final portrait = height > width;
+    final aspect = portrait ? width / (height / 6) : height / (width / 6);
+
+    final _length = controller.restaurants.length;
+
+    if (controller.isLoading) {
+      return Center(child: CircularProgressIndicator());
+    } else if (controller.restaurants.isEmpty) {
+      return EmptyContent(
+        title: 'Nada por aqui',
+        message: 'Sem Restaurantes registrados!',
+      );
+    } else {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: portrait ? 1 : 2,
+          childAspectRatio: aspect,
+        ),
+        itemCount: _length,
+        itemBuilder: (context, index) {
+          final restaurant = controller.restaurants[index];
+          return RestaurantInfoCard(
+            restaurant: restaurant,
+            mediaCache: controller.mediaCache,
+            expanded: true,
+            height: (portrait ? height : width) / 6,
+            onTap: () => controller.showDetails(restaurant: restaurant),
+          );
+        },
+      );
+    }
   }
 }

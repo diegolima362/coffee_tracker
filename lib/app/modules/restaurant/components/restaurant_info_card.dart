@@ -1,6 +1,7 @@
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
+import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class RestaurantInfoCard extends StatelessWidget {
   final RestaurantModel restaurant;
@@ -11,11 +12,13 @@ class RestaurantInfoCard extends StatelessWidget {
   final double opacity;
   final double radius;
   final bool expanded;
+  final MediaCache mediaCache;
   final void Function() onTap;
 
   const RestaurantInfoCard({
     Key key,
     @required this.restaurant,
+    @required this.mediaCache,
     this.width,
     this.height,
     this.cardColor,
@@ -28,33 +31,46 @@ class RestaurantInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final _width = width ?? MediaQuery.of(context).size.width * 0.4;
-    final _height = height ?? MediaQuery.of(context).size.height * 0.2;
+    final _ratio = MediaQuery.of(context).size.aspectRatio;
+    final _width =
+        width ?? MediaQuery.of(context).size.width * (expanded ? 1 : 0.35);
+    final _height =
+        height ?? MediaQuery.of(context).size.height * (expanded ? 0.15 : 0.25);
     final textColor = expanded ? null : Colors.white;
-    final subTitleColor = expanded
-        ? isDark
-            ? Colors.white70
-            : Colors.black54
-        : Colors.white70;
+
+    final _imageWidth = expanded ? _width * (_ratio > 1 ? 0.15 : 0.3) : _width;
+    final _textLeftPosition = _width * .015 + (expanded ? _imageWidth : 0);
+
+    final w = MediaQuery.of(context).size.width * .6;
+    final h = MediaQuery.of(context).size.height * .4;
+    final fit = BoxFit.cover;
+
+    final subtitleColor = Theme.of(context).textTheme.subtitle2.color;
 
     return GestureDetector(
       onTap: onTap,
       child: Card(
         margin: const EdgeInsets.all(2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+        ),
         child: Stack(
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(radius),
               child: Container(
                 color: overlayColor,
-                width: expanded ? _width * 0.3 : _width,
+                width: _imageWidth,
                 height: _height,
-                child: Image(
-                  image: NetworkImage(restaurant.photoURL),
-                  fit: BoxFit.cover,
-                ),
+                child: restaurant.fileName != null &&
+                        restaurant.fileName.isNotEmpty
+                    ? buildImage()
+                    : Image.asset(
+                        'images/no-image.png',
+                        width: w,
+                        height: h,
+                        fit: fit,
+                      ),
               ),
             ),
             Opacity(
@@ -63,65 +79,82 @@ class RestaurantInfoCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(radius),
                 child: Container(
                   color: overlayColor,
-                  width: expanded ? _width * 0.3 : _width,
+                  width: _imageWidth,
                   height: _height,
                 ),
               ),
             ),
             Positioned(
-              left: _width * (expanded ? 0.31 : 0.03),
-              bottom: _height * 0.03,
-              width: _width,
+              left: _textLeftPosition,
+              bottom: _height * 0.01,
               child: Container(
-                width: expanded ? _width * 0.5 : _width * 0.8,
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    '${restaurant.name}',
-                    style: TextStyle(color: textColor),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                  subtitle: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.locationArrow,
-                        size: 12,
-                        color: subTitleColor,
+                width: _imageWidth * (expanded ? 1.5 : 0.95),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Format.capitalString(restaurant.name),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: expanded ? 20 : 16,
                       ),
-                      SizedBox(width: 2),
-                      Text(
-                        '${restaurant.city}, ${restaurant.state}',
-                        style: TextStyle(color: subTitleColor),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      '${Format.capitalString(restaurant.city)}, ${restaurant.state.toUpperCase()}',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: subtitleColor, fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
             ),
-            Positioned(
-              right: _width * (expanded ? 0.01 : 0.05),
-              top: _height * (expanded ? 0.75 : 0.05),
-              child: Row(
-                children: [
-                  Text(
-                    '${restaurant.rate}',
-                    style: TextStyle(color: textColor),
-                  ),
-                  SizedBox(width: 3),
-                  Icon(
-                    Icons.star,
-                    size: 16,
-                    color: subTitleColor,
-                  ),
-                ],
+            if (restaurant.allReviews?.isNotEmpty ?? false)
+              Positioned(
+                right: _width * 0.01,
+                top: _height * 0.05,
+                child: Row(
+                  children: [
+                    Text(
+                      restaurant.rate.toStringAsFixed(1),
+                      style: TextStyle(color: textColor),
+                    ),
+                    SizedBox(width: 3),
+                    Icon(
+                      Icons.star,
+                      size: 16,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildImage() {
+    if (restaurant.fileName.isEmpty) {
+      return Image.asset(
+        'images/no-image.png',
+        fit: BoxFit.cover,
+      );
+    }
+
+    return FutureBuilder<Image>(
+      future:
+          mediaCache.fetchRestaurantImage(restaurant.fileName, restaurant.id),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return snapshot.data;
+        } else {
+          return Image.asset(
+            'images/no-image.png',
+            fit: BoxFit.cover,
+          );
+        }
+      },
     );
   }
 }

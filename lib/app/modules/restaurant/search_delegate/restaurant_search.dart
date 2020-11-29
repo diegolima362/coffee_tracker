@@ -1,5 +1,8 @@
 import 'package:coffee_tracker/app/modules/restaurant/restaurant_controller.dart';
+import 'package:coffee_tracker/app/shared/components/empty_content.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
+import 'package:coffee_tracker/app/utils/format.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 
 class RestaurantSearch extends SearchDelegate<RestaurantModel> {
@@ -16,7 +19,11 @@ class RestaurantSearch extends SearchDelegate<RestaurantModel> {
 
   @override
   ThemeData appBarTheme(BuildContext context) {
-    return controller.isDark ? ThemeData.dark() : ThemeData.light();
+    final ThemeData theme = Theme.of(context);
+    return theme.copyWith(
+        primaryIconTheme: theme.iconTheme,
+        primaryColor: theme.appBarTheme.color,
+        textTheme: TextTheme());
   }
 
   @override
@@ -39,13 +46,20 @@ class RestaurantSearch extends SearchDelegate<RestaurantModel> {
 
   @override
   Widget buildResults(BuildContext context) {
+    if (suggestions.isEmpty)
+      return EmptyContent(
+        title: 'Nada por aqui!',
+        message: 'Nenhum resultado encontrado',
+      );
+
     return ListView.builder(
       itemCount: suggestions.length,
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(
-            suggestions[index].name,
+            Format.capitalString(suggestions[index].name),
           ),
+          subtitle: Text(Format.capitalString(suggestions[index].city)),
           onTap: () {
             controller.showDetails(restaurant: suggestions[index]);
           },
@@ -62,8 +76,10 @@ class RestaurantSearch extends SearchDelegate<RestaurantModel> {
         ? suggestions = _recent
         : suggestions.addAll(
             controller.restaurants.where((e) =>
-                e.name.toLowerCase().contains(query.toLowerCase()) ||
-                e.city.toLowerCase().contains(query.toLowerCase())),
+                removeDiacritics(e.name.toLowerCase())
+                    .contains(removeDiacritics(query.toLowerCase())) ||
+                removeDiacritics(removeDiacritics(e.city.toLowerCase()))
+                    .contains(removeDiacritics(query.toLowerCase()))),
           );
 
     return ListView.builder(
@@ -71,8 +87,9 @@ class RestaurantSearch extends SearchDelegate<RestaurantModel> {
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(
-            suggestions[index].name,
+            Format.capitalString(suggestions[index].name),
           ),
+          subtitle: Text(Format.capitalString(suggestions[index].city)),
           onTap: () {
             selectedResult = suggestions[index];
             _recent.add(suggestions[index]);
