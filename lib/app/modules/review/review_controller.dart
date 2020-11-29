@@ -1,5 +1,7 @@
+import 'package:coffee_tracker/app/modules/review/search_delegate/review_search.dart';
+import 'package:coffee_tracker/app/modules/review/sort_by.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
-import 'package:coffee_tracker/app/shared/repositories/local_storage/local_storage_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
@@ -11,8 +13,11 @@ class ReviewController = _ReviewControllerBase with _$ReviewController;
 
 abstract class _ReviewControllerBase with Store {
   _ReviewControllerBase() {
-    loadReviews();
+    searchDelegate = ReviewSearch(controller: this);
+    loadData();
   }
+
+  ReviewSearch searchDelegate;
 
   @observable
   bool isLoading;
@@ -21,11 +26,11 @@ abstract class _ReviewControllerBase with Store {
   ObservableList<ReviewModel> reviews;
 
   @action
-  Future<void> loadReviews() async {
+  Future<void> loadData() async {
     reviews = ObservableList<ReviewModel>();
 
     isLoading = true;
-    final ILocalStorage storage = Modular.get();
+    final IStorageRepository storage = Modular.get();
     reviews.addAll(await storage.getAllReviews());
 
     reviews.reversed
@@ -41,7 +46,28 @@ abstract class _ReviewControllerBase with Store {
   }
 
   @action
-  void addReview() {
-    Modular.to.pushNamed('review/edit', arguments: null);
+  Future<void> addReview() async {
+    final IStorageRepository storage = Modular.get();
+    final data = await storage.getAllRestaurants();
+
+    if (data.isEmpty) {
+      print('> empty data');
+    } else {
+      Modular.to.pushNamed('review/edit', arguments: null);
+    }
+  }
+
+  @action
+  void sortBy(SortBy value) {
+    if (reviews == null || reviews.isEmpty) return;
+    if (value == SortBy.RESTAURANT) {
+      reviews.sort((a, b) => a.restaurantName
+          .toLowerCase()
+          .compareTo(b.restaurantName.toLowerCase()));
+    } else if (value == SortBy.RATE) {
+      reviews.sort((a, b) => b.rate.compareTo(a.rate));
+    } else if (value == SortBy.DATE) {
+      reviews.sort((a, b) => a.visitDate.compareTo(b.visitDate));
+    }
   }
 }

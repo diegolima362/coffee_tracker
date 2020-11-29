@@ -1,3 +1,4 @@
+import 'package:coffee_tracker/app/modules/review/sort_by.dart';
 import 'package:coffee_tracker/app/shared/components/empty_content.dart';
 import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,21 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: controller.searchDelegate,
+              );
+            },
+          ),
+          buildPopupMenuButton(),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Adicionar Review',
         child: Icon(Icons.add),
@@ -30,6 +45,22 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
       body: Observer(
         builder: _buildContent,
       ),
+    );
+  }
+
+  Widget buildPopupMenuButton() {
+    return PopupMenuButton<SortBy>(
+      icon: Icon(Icons.sort_sharp),
+      onSelected: (value) => controller.sortBy(value),
+      itemBuilder: (BuildContext context) {
+        final choices = ['Restaurante', 'Nota', 'Data'];
+        return choices.map((String choice) {
+          return PopupMenuItem<SortBy>(
+            value: SortBy.values[choices.indexOf(choice)],
+            child: Text(choice),
+          );
+        }).toList();
+      },
     );
   }
 

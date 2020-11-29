@@ -1,5 +1,6 @@
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
-import 'package:coffee_tracker/app/shared/repositories/local_storage/local_storage_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -23,6 +24,15 @@ abstract class _ReviewDetailsControllerBase with Store {
   @action
   void setReview(ReviewModel r) => review = r;
 
+  Map<String, String> get shareData {
+    final name = FirebaseAuth.instance.currentUser.displayName;
+
+    return {
+      'text': review.getShareText(name),
+      'subject': 'Avaliação de Café: ${review.restaurantName}',
+    };
+  }
+
   @action
   void edit() {
     Modular.link.pushNamed('/edit', arguments: review);
@@ -30,11 +40,11 @@ abstract class _ReviewDetailsControllerBase with Store {
 
   @action
   Future<void> delete() async {
-    final ILocalStorage storage = Modular.get();
+    final IStorageRepository storage = Modular.get();
     await storage.deleteReview(review.id);
 
     final ReviewController controller = Modular.get();
-    await controller.loadReviews();
+    await controller.loadData();
 
     Modular.navigator.pop();
   }

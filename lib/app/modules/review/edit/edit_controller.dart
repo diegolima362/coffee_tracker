@@ -2,7 +2,7 @@ import 'package:coffee_tracker/app/modules/review/review_controller.dart';
 import 'package:coffee_tracker/app/modules/review/review_details/review_details_controller.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
-import 'package:coffee_tracker/app/shared/repositories/local_storage/local_storage_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
 import 'package:coffee_tracker/app/utils/id_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -44,7 +44,7 @@ abstract class _EditControllerBase with Store {
 
     final date = DateTime.now();
 
-    setRate(review?.rate ?? 5);
+    setRate(review?.rate ?? 2.5);
     setVisitDate(review?.visitDate ?? date);
     setVisitTime(TimeOfDay.fromDateTime(review?.visitDate ?? date));
     setText(review?.text ?? '');
@@ -57,8 +57,17 @@ abstract class _EditControllerBase with Store {
     isLoading = true;
     restaurants = ObservableList<RestaurantModel>();
 
-    final ILocalStorage storage = Modular.get();
-    restaurants.addAll(await storage.getAllRestaurants());
+    final IStorageRepository storage = Modular.get();
+    final data = await storage.getAllRestaurants();
+
+    if (data.isEmpty) {
+      print('> empty data');
+      isLoading = false;
+      _goToAddRestaurant();
+    } else
+      print(data);
+
+    restaurants.addAll(data);
 
     if (review?.restaurantId != null) {
       final l = restaurants.where((r) => r.id == review.id).toList();
@@ -108,11 +117,11 @@ abstract class _EditControllerBase with Store {
     return ReviewModel(
       id: id,
       restaurantId: restaurant.id,
-      restaurantName: restaurant.name,
+      restaurantName: restaurant.name.trim(),
       rate: rate,
       reviewDate: reviewDate,
       visitDate: date,
-      text: text,
+      text: text.trim(),
     );
   }
 
@@ -123,12 +132,16 @@ abstract class _EditControllerBase with Store {
       controller.setReview(_reviewFromState());
     }
 
-    final ILocalStorage storage = Modular.get();
+    final IStorageRepository storage = Modular.get();
     await storage.persistReview(_reviewFromState());
 
     final ReviewController controller = Modular.get();
-    await controller.loadReviews();
+    await controller.loadData();
 
     Modular.navigator.pop();
+  }
+
+  void _goToAddRestaurant() {
+    Modular.to.pop();
   }
 }

@@ -41,7 +41,10 @@ class _EditPageState extends ModularState<EditPage, EditController> {
             builder: (_) => FlatButton(
               child: Text(
                 'Salvar',
-                style: TextStyle(fontSize: 20.0),
+                style: TextStyle(
+                  fontSize: 20.0,
+                  color: Theme.of(context).appBarTheme.iconTheme.color,
+                ),
               ),
               onPressed: controller.restaurant != null
                   ? () => controller.save()
@@ -103,7 +106,7 @@ class _EditPageState extends ModularState<EditPage, EditController> {
         Expanded(
           child: InputDropdown(
             labelText: 'Data',
-            valueText: Format.date(controller.visitDate),
+            valueText: Format.simpleDate(controller.visitDate),
             valueStyle: valueStyle,
             onPressed: _selectDate,
           ),
@@ -150,7 +153,7 @@ class _EditPageState extends ModularState<EditPage, EditController> {
   Widget _buildText() {
     return TextFormField(
       keyboardType: TextInputType.text,
-      maxLength: 500,
+      autofocus: false,
       maxLines: null,
       controller: textController,
       decoration: InputDecoration(
@@ -177,10 +180,9 @@ class _EditPageState extends ModularState<EditPage, EditController> {
         itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
         glow: false,
         itemSize: iconSize,
-        itemBuilder: (context, _) => Icon(
-          Icons.star,
-          color: Colors.amber,
-        ),
+        itemBuilder: (_, __) {
+          return Icon(Icons.star, color: Theme.of(context).primaryColor);
+        },
         onRatingUpdate: controller.setRate,
       ),
     );
