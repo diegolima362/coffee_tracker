@@ -65,6 +65,7 @@ abstract class _AuthControllerBase with Store {
       );
       status = AuthStatus.loggedOn;
     } on PlatformException {
+      status = AuthStatus.loggedOut;
       rethrow;
     }
   }
@@ -76,13 +77,11 @@ abstract class _AuthControllerBase with Store {
   }) async {
     status = AuthStatus.loading;
     try {
-      user = await _authRepository.getEmailPasswordSignup(
+      user = await _authRepository.getEmailPasswordSignUp(
         email: email,
         password: password,
       );
-      status = AuthStatus.loggedOn;
     } on PlatformException {
-      status = AuthStatus.loggedOut;
       rethrow;
     }
   }
@@ -100,9 +99,16 @@ abstract class _AuthControllerBase with Store {
   }
 
   @action
-  Future logout() {
-    return _authRepository.getLogout();
+  Future<void> logout() async {
+    try {
+      await _authRepository.getLogout();
+      status = AuthStatus.loggedOut;
+    } on PlatformException {
+      rethrow;
+    }
   }
+
+  Stream<User> get onAuthStateChanged => _authRepository.onAuthStateChanged;
 }
 
 enum AuthStatus { loading, loggedOn, loggedOut }

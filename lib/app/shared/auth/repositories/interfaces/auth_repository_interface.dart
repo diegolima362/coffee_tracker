@@ -4,13 +4,15 @@ import 'package:flutter_modular/flutter_modular.dart';
 abstract class IAuthRepository implements Disposable {
   Future<User> getGoogleLogin();
 
+  Stream<User> get onAuthStateChanged;
+
   Future<User> getEmailPasswordLogin({String email, String password});
 
-  Future<User> getEmailPasswordSignup({String email, String password});
+  Future<User> getEmailPasswordSignUp({String email, String password});
 
   Future<String> getToken();
 
-  Future getLogout();
+  Future<void> getLogout();
 
   Stream<User> getUser();
 

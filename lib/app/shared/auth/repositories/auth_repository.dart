@@ -1,5 +1,6 @@
 import 'package:coffee_tracker/app/utils/connection_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -10,23 +11,24 @@ class AuthRepository implements IAuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
-  Future<String> getToken() {
-    return _auth.currentUser.getIdToken();
+  Future<String> getToken() async {
+    return await _auth.currentUser.getIdToken();
   }
 
   @override
   Future<User> getGoogleLogin() async {
     User user;
-
-    try {
-      if (!await CheckConnection.checkConnection()) {
-        throw PlatformException(
-          message: 'Sem conexão com a internet',
-          code: 'error_connection',
-        );
+    if (!kIsWeb) {
+      try {
+        if (!await CheckConnection.checkConnection()) {
+          throw PlatformException(
+            message: 'Sem conexão com a internet',
+            code: 'error_connection',
+          );
+        }
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
     }
 
     try {
@@ -50,12 +52,14 @@ class AuthRepository implements IAuthRepository {
   }
 
   @override
-  Future getLogout() {
-    return _auth.signOut();
+  Future<void> getLogout() async {
+    try {
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+    } on PlatformException {
+      rethrow;
+    }
   }
-
-  @override
-  void dispose() {}
 
   @override
   Stream<User> getUser() {
@@ -65,16 +69,19 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<User> getEmailPasswordLogin({String email, String password}) async {
     UserCredential authResult;
-    try {
-      if (!await CheckConnection.checkConnection()) {
-        throw PlatformException(
-          message: 'Sem conexão com a internet',
-          code: 'error_connection',
-        );
+    if (!kIsWeb) {
+      try {
+        if (!await CheckConnection.checkConnection()) {
+          throw PlatformException(
+            message: 'Sem conexão com a internet',
+            code: 'error_connection',
+          );
+        }
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
     }
+
     try {
       authResult = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -100,17 +107,19 @@ class AuthRepository implements IAuthRepository {
   }
 
   @override
-  Future<User> getEmailPasswordSignup({String email, String password}) async {
+  Future<User> getEmailPasswordSignUp({String email, String password}) async {
     UserCredential authResult;
-    try {
-      if (!await CheckConnection.checkConnection()) {
-        throw PlatformException(
-          message: 'Sem conexão com a internet',
-          code: 'error_connection',
-        );
+    if (!kIsWeb) {
+      try {
+        if (!await CheckConnection.checkConnection()) {
+          throw PlatformException(
+            message: 'Sem conexão com a internet',
+            code: 'error_connection',
+          );
+        }
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
     }
 
     try {
@@ -137,15 +146,17 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<void> resetPassword(String email) async {
-    try {
-      if (!await CheckConnection.checkConnection()) {
-        throw PlatformException(
-          message: 'Sem conexão com a internet',
-          code: 'error_connection',
-        );
+    if (!kIsWeb) {
+      try {
+        if (!await CheckConnection.checkConnection()) {
+          throw PlatformException(
+            message: 'Sem conexão com a internet',
+            code: 'error_connection',
+          );
+        }
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
     }
 
     try {
@@ -166,16 +177,19 @@ class AuthRepository implements IAuthRepository {
   }
 
   Future<void> validateEmail(String code) async {
-    try {
-      if (!await CheckConnection.checkConnection()) {
-        throw PlatformException(
-          message: 'Sem conexão com a internet',
-          code: 'error_connection',
-        );
+    if (!kIsWeb) {
+      try {
+        if (!await CheckConnection.checkConnection()) {
+          throw PlatformException(
+            message: 'Sem conexão com a internet',
+            code: 'error_connection',
+          );
+        }
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
     }
+
     try {
       await _auth.checkActionCode(code);
       await _auth.applyActionCode(code);
@@ -193,16 +207,19 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<bool> validateCode(String code) async {
-    try {
-      if (!await CheckConnection.checkConnection()) {
-        throw PlatformException(
-          message: 'Sem conexão com a internet',
-          code: 'error_connection',
-        );
+    if (!kIsWeb) {
+      try {
+        if (!await CheckConnection.checkConnection()) {
+          throw PlatformException(
+            message: 'Sem conexão com a internet',
+            code: 'error_connection',
+          );
+        }
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
     }
+
     try {
       await _auth.checkActionCode(code);
       await _auth.applyActionCode(code);
@@ -216,4 +233,10 @@ class AuthRepository implements IAuthRepository {
 
     return true;
   }
+
+  @override
+  void dispose() {}
+
+  @override
+  Stream<User> get onAuthStateChanged => _auth.authStateChanges();
 }
