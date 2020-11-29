@@ -1,5 +1,8 @@
-import 'package:coffee_tracker/app/modules/settings/settings_module.dart';
+import 'package:coffee_tracker/app/shared/components/avatar.dart';
+import 'package:coffee_tracker/app/shared/components/platform_alert_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'profile_controller.dart';
@@ -14,33 +17,149 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends ModularState<ProfilePage, ProfileController> {
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final title = 'Sair';
+    final content = 'Tem certeza que quer sair?';
+
+    final didRequestSignOut = kIsWeb
+        ? await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(title),
+                content: Text(content),
+                actions: [
+                  FlatButton(
+                    child: Text('Cancelar'),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  FlatButton(
+                    child: Text('OK'),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ],
+              );
+            },
+          )
+        : await PlatformAlertDialog(
+            title: title,
+            content: content,
+            cancelActionText: 'Cancelar',
+            defaultActionText: 'Sair',
+          ).show(context);
+
+    if (didRequestSignOut == true) {
+      await controller.logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      initialIndex: 0,
-      length: 2,
-      child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title),
-            bottom: TabBar(
-              tabs: <Widget>[
-                Tab(child: Text('Seus Dados')),
-                Tab(child: Text('Configurações')),
+    final color = Theme.of(context).iconTheme.color;
+
+    return Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                buildAvatar(),
+                SizedBox(height: 20),
+                Text(
+                  controller.user.displayName,
+                  style: TextStyle(fontSize: 18),
+                ),
+                FutureBuilder<void>(
+                  future: controller.mediaCache.loadCache(),
+                  builder: (_, __) {
+                    if (__.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else {
+                      return Card(
+                        margin: EdgeInsets.all(10),
+                        elevation: 2.0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0)),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text('Imagens'),
+                              trailing: Text(
+                                '${controller.mediaCache.numberOfPhotos}',
+                              ),
+                            ),
+                            Divider(height: 1.0),
+                            ListTile(
+                              title: Text('Dados salvos'),
+                              trailing: Text(
+                                '${(controller.mediaCache.size / 1024 / 1024).toStringAsFixed(2)} MB',
+                              ),
+                            ),
+                            Divider(height: 1.0),
+                            ListTile(
+                              title: Text('Dados Pendentes'),
+                              trailing: Text(
+                                  '${controller.mediaCache.numberOfPending}'),
+                            ),
+                            Divider(height: 1.0),
+                            ListTile(
+                              title: Text('Sincronizar dados'),
+                              trailing: Icon(
+                                Icons.cloud_upload,
+                                color: color,
+                              ),
+                              onTap: () => controller.mediaCache.synchronize(),
+                            ),
+                            Divider(height: 1.0),
+                            ListTile(
+                              title: Text('Deletar Cache'),
+                              trailing: Icon(
+                                Icons.delete,
+                                color: color,
+                              ),
+                              onTap: () => controller.mediaCache.flush(),
+                            ),
+                            Divider(height: 1.0),
+                            ListTile(
+                              title: Text('Tema Escuro'),
+                              trailing: Switch(
+                                value: controller.dark,
+                                onChanged: controller.setDark,
+                              ),
+                            ),
+                            Divider(height: 1.0),
+                            ListTile(
+                              title: Text('Sair'),
+                              onTap: () => _confirmSignOut(context),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
+                ),
               ],
             ),
           ),
-          body: TabBarView(
-            children: <Widget>[
-              Container(
-                child: Center(
-                  child: Text('Dados'),
-                ),
-              ),
-              Container(
-                child: SettingsModule(),
-              ),
-            ],
-          )),
+        ));
+  }
+
+  Observer buildAvatar() {
+    return Observer(
+      builder: (_) {
+        if (controller.isOffline == null || !controller.isOffline)
+          return Avatar(
+            image: Image.asset('images/no-image.png'),
+            radius: 75,
+          );
+        else
+          return Avatar(
+            image: Image.network(controller.user.photoURL),
+            radius: 75,
+          );
+      },
     );
   }
 }

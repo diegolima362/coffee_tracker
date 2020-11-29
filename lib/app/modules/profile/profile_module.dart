@@ -7,7 +7,7 @@ import 'profile_page.dart';
 class ProfileModule extends WidgetModule {
   @override
   List<Bind> get binds => [
-        Bind((i) => ProfileController()),
+        $ProfileController,
       ];
 
   @override
