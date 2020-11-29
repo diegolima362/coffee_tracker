@@ -1,8 +1,8 @@
 import 'package:coffee_tracker/app/modules/restaurant/components/restaurant_info_card.dart';
-import 'package:coffee_tracker/app/shared/components/list_items_builder.dart';
-import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
-import 'package:coffee_tracker/app/shared/models/review_model.dart';
+import 'package:coffee_tracker/app/shared/components/empty_content.dart';
+import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'home_content_controller.dart';
@@ -21,7 +21,13 @@ class _HomeContentPageState
     extends ModularState<HomeContentPage, HomeContentController> {
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    final portrait = height > width;
     final screenSize = MediaQuery.of(context).size;
+
+    final textStyle = Theme.of(context).textTheme.bodyText2;
+
     return Scaffold(
       appBar: AppBar(title: Text('Home')),
       body: SingleChildScrollView(
@@ -29,26 +35,20 @@ class _HomeContentPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: screenSize.height * .015),
-            Container(
-              height: screenSize.height * .02,
-              child: Text(
-                'Restaurantes Favoritos',
-                style: TextStyle(fontSize: 16),
-              ),
+            SizedBox(height: 5),
+            Text(
+              'Restaurantes Favoritos',
+              style: textStyle,
             ),
             SizedBox(height: screenSize.height * .015),
             Container(
               child: _buildFavorites(),
-              height: screenSize.height * .2,
+              height: height * (portrait ? .2 : .3),
             ),
-            SizedBox(height: screenSize.height * .035),
-            Container(
-              height: screenSize.height * .02,
-              child: Text(
-                'Ultimas Reviews',
-                style: TextStyle(fontSize: 16),
-              ),
+            SizedBox(height: 10),
+            Text(
+              'Ultimas Reviews',
+              style: textStyle,
             ),
             SizedBox(height: screenSize.height * .015),
             Container(
@@ -62,48 +62,78 @@ class _HomeContentPageState
   }
 
   Widget _buildFavorites() {
-    return FutureBuilder<List<RestaurantModel>>(
-      future: controller.favorites,
-      builder: (context, snapshot) {
-        return ListItemsBuilder<RestaurantModel>(
-          horizontal: true,
-          snapshot: snapshot,
-          itemBuilder: (BuildContext context, item) {
-            return RestaurantInfoCard(
-              restaurant: item,
-              onTap: () => controller.showDetails(item),
-            );
-          },
-        );
+    return Observer(
+      builder: (BuildContext context) {
+        final width = MediaQuery.of(context).size.width;
+        final height = MediaQuery.of(context).size.height;
+        final portrait = height > width;
+        final _length = controller.restaurants.length;
+
+        if (controller.loadingRestaurants) {
+          return Center(child: CircularProgressIndicator());
+        } else if (controller.restaurants.isEmpty) {
+          return EmptyContent(
+            title: 'Nada por aqui',
+            message: 'Sem Restaurantes registrados!',
+          );
+        } else {
+          return ListView.builder(
+            itemCount: _length,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              final restaurant = controller.restaurants[index];
+              return RestaurantInfoCard(
+                mediaCache: controller.mediaCache,
+                restaurant: restaurant,
+                height: (portrait ? height : width) / 4,
+                width: (portrait ? width : height) / 3,
+                onTap: () => controller.showRestaurantDetails(restaurant),
+              );
+            },
+          );
+        }
       },
     );
   }
 
   Widget _buildLastReviews() {
-    return FutureBuilder<List<ReviewModel>>(
-      future: controller.last,
-      builder: (context, snapshot) {
-        return ListItemsBuilder<ReviewModel>(
-          snapshot: snapshot,
-          itemBuilder: (BuildContext context, item) {
-            return Card(
-              margin: EdgeInsets.only(bottom: 5),
-              child: ListTile(
-                contentPadding: EdgeInsets.all(5),
-                title: Text('${item.restaurantName}'),
-                subtitle: Text('${item.reviewDate}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('${item.rate}'),
-                    SizedBox(width: 2),
-                    Icon(Icons.star, size: 16),
-                  ],
+    return Observer(
+      builder: (_) {
+        final reviews = controller.reviews;
+        final _length = reviews.length;
+        if (controller.loadingReviews) {
+          return Center(child: CircularProgressIndicator());
+        } else if (reviews.isEmpty) {
+          return EmptyContent(
+            title: 'Nada por aqui',
+            message: 'Sem Reviews registradas!',
+          );
+        } else {
+          return ListView.builder(
+            itemCount: _length,
+            itemBuilder: (context, index) {
+              final review = reviews[index];
+              return GestureDetector(
+                onTap: () => controller.showReviewsDetails(review),
+                child: Card(
+                  child: ListTile(
+                    title: Text(review.restaurantName),
+                    subtitle: Text(
+                      Format.date(review.reviewDate),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(review.rate.toString()),
+                        Icon(Icons.star, size: 12),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            );
-          },
-        );
+              );
+            },
+          );
+        }
       },
     );
   }

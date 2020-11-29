@@ -1,6 +1,7 @@
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
-import 'package:coffee_tracker/app/shared/repositories/local_storage/local_storage_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -10,62 +11,68 @@ class HomeContentController = _HomeContentBase with _$HomeContentController;
 
 abstract class _HomeContentBase with Store {
   @observable
-  int value = 0;
-
-  @action
-  void increment() {
-    value++;
-  }
+  ObservableList<RestaurantModel> restaurants;
 
   @observable
-  List<RestaurantModel> _restaurants;
+  bool loadingRestaurants;
 
   @observable
-  List<ReviewModel> _reviews;
+  bool loadingReviews;
+
+  @observable
+  ObservableList<ReviewModel> reviews;
+
+  IStorageRepository _storage;
 
   _HomeContentBase() {
+    _storage = Modular.get();
+    mediaCache = Modular.get();
+
+    mediaCache.loadCache();
+
     _loadRestaurants();
     _loadReviews();
   }
 
+  MediaCache mediaCache;
+
   @action
   Future<void> _loadRestaurants() async {
-    final ILocalStorage storage = Modular.get();
-    _restaurants = await storage.getAllRestaurants();
+    loadingRestaurants = true;
+    restaurants = ObservableList<RestaurantModel>();
+
+    final _restaurants = await _storage.getAllRestaurants();
+
+    restaurants.addAll(_restaurants.where((r) => r.favorite).toList());
+
+    restaurants
+        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    loadingRestaurants = false;
   }
 
   @action
   Future<void> _loadReviews() async {
-    final ILocalStorage storage = Modular.get();
-    _reviews = await storage.getAllReviews();
-  }
+    loadingReviews = true;
+    reviews = ObservableList<ReviewModel>();
 
-  @computed
-  Future<List<ReviewModel>> get last async {
-    if (_reviews == null) {
-      final ILocalStorage storage = Modular.get();
-      _reviews = await storage.getAllReviews();
+    final _reviews = await _storage.getAllReviews();
+    if (_reviews.isNotEmpty) {
+      _reviews.sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
+      final limit = _reviews.length < 5 ? _reviews.length : 5;
+      reviews.addAll(_reviews.reversed.toList().sublist(0, limit));
     }
 
-    _reviews.sort((a, b) => a.reviewDate.compareTo(b.reviewDate));
-
-    return _reviews.reversed.toList().sublist(0, 5);
-  }
-
-  @computed
-  Future<List<RestaurantModel>> get favorites async {
-    if (_restaurants == null) {
-      final ILocalStorage storage = Modular.get();
-      _restaurants = await storage.getAllRestaurants();
-    }
-
-    _restaurants.sort((a, b) => a.rate.compareTo(b.rate));
-
-    return _restaurants.reversed.toList().sublist(0, 5);
+    loadingReviews = false;
   }
 
   @action
-  void showDetails(RestaurantModel restaurant) {
-    Modular.to.pushNamed('/restaurant/detail', arguments: restaurant);
+  void showRestaurantDetails(RestaurantModel restaurant) {
+    Modular.to.pushNamed('/restaurant/details', arguments: restaurant);
+  }
+
+  @action
+  void showReviewsDetails(ReviewModel review) {
+    Modular.to.pushNamed('/review/details', arguments: review);
   }
 }
