@@ -9,63 +9,64 @@ part of 'home_content_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$HomeContentController on _HomeContentBase, Store {
-  Computed<Future<List<ReviewModel>>> _$lastComputed;
+  final _$restaurantsAtom = Atom(name: '_HomeContentBase.restaurants');
 
   @override
-  Future<List<ReviewModel>> get last =>
-      (_$lastComputed ??= Computed<Future<List<ReviewModel>>>(() => super.last,
-              name: '_HomeContentBase.last'))
-          .value;
-  Computed<Future<List<RestaurantModel>>> _$favoritesComputed;
-
-  @override
-  Future<List<RestaurantModel>> get favorites => (_$favoritesComputed ??=
-          Computed<Future<List<RestaurantModel>>>(() => super.favorites,
-              name: '_HomeContentBase.favorites'))
-      .value;
-
-  final _$valueAtom = Atom(name: '_HomeContentBase.value');
-
-  @override
-  int get value {
-    _$valueAtom.reportRead();
-    return super.value;
+  ObservableList<RestaurantModel> get restaurants {
+    _$restaurantsAtom.reportRead();
+    return super.restaurants;
   }
 
   @override
-  set value(int value) {
-    _$valueAtom.reportWrite(value, super.value, () {
-      super.value = value;
+  set restaurants(ObservableList<RestaurantModel> value) {
+    _$restaurantsAtom.reportWrite(value, super.restaurants, () {
+      super.restaurants = value;
     });
   }
 
-  final _$_restaurantsAtom = Atom(name: '_HomeContentBase._restaurants');
+  final _$loadingRestaurantsAtom =
+      Atom(name: '_HomeContentBase.loadingRestaurants');
 
   @override
-  List<RestaurantModel> get _restaurants {
-    _$_restaurantsAtom.reportRead();
-    return super._restaurants;
+  bool get loadingRestaurants {
+    _$loadingRestaurantsAtom.reportRead();
+    return super.loadingRestaurants;
   }
 
   @override
-  set _restaurants(List<RestaurantModel> value) {
-    _$_restaurantsAtom.reportWrite(value, super._restaurants, () {
-      super._restaurants = value;
+  set loadingRestaurants(bool value) {
+    _$loadingRestaurantsAtom.reportWrite(value, super.loadingRestaurants, () {
+      super.loadingRestaurants = value;
     });
   }
 
-  final _$_reviewsAtom = Atom(name: '_HomeContentBase._reviews');
+  final _$loadingReviewsAtom = Atom(name: '_HomeContentBase.loadingReviews');
 
   @override
-  List<ReviewModel> get _reviews {
-    _$_reviewsAtom.reportRead();
-    return super._reviews;
+  bool get loadingReviews {
+    _$loadingReviewsAtom.reportRead();
+    return super.loadingReviews;
   }
 
   @override
-  set _reviews(List<ReviewModel> value) {
-    _$_reviewsAtom.reportWrite(value, super._reviews, () {
-      super._reviews = value;
+  set loadingReviews(bool value) {
+    _$loadingReviewsAtom.reportWrite(value, super.loadingReviews, () {
+      super.loadingReviews = value;
+    });
+  }
+
+  final _$reviewsAtom = Atom(name: '_HomeContentBase.reviews');
+
+  @override
+  ObservableList<ReviewModel> get reviews {
+    _$reviewsAtom.reportRead();
+    return super.reviews;
+  }
+
+  @override
+  set reviews(ObservableList<ReviewModel> value) {
+    _$reviewsAtom.reportWrite(value, super.reviews, () {
+      super.reviews = value;
     });
   }
 
@@ -89,22 +90,22 @@ mixin _$HomeContentController on _HomeContentBase, Store {
       ActionController(name: '_HomeContentBase');
 
   @override
-  void increment() {
+  void showRestaurantDetails(RestaurantModel restaurant) {
     final _$actionInfo = _$_HomeContentBaseActionController.startAction(
-        name: '_HomeContentBase.increment');
+        name: '_HomeContentBase.showRestaurantDetails');
     try {
-      return super.increment();
+      return super.showRestaurantDetails(restaurant);
     } finally {
       _$_HomeContentBaseActionController.endAction(_$actionInfo);
     }
   }
 
   @override
-  void showDetails(RestaurantModel restaurant) {
+  void showReviewsDetails(ReviewModel review) {
     final _$actionInfo = _$_HomeContentBaseActionController.startAction(
-        name: '_HomeContentBase.showDetails');
+        name: '_HomeContentBase.showReviewsDetails');
     try {
-      return super.showDetails(restaurant);
+      return super.showReviewsDetails(review);
     } finally {
       _$_HomeContentBaseActionController.endAction(_$actionInfo);
     }
@@ -113,9 +114,10 @@ mixin _$HomeContentController on _HomeContentBase, Store {
   @override
   String toString() {
     return '''
-value: ${value},
-last: ${last},
-favorites: ${favorites}
+restaurants: ${restaurants},
+loadingRestaurants: ${loadingRestaurants},
+loadingReviews: ${loadingReviews},
+reviews: ${reviews}
     ''';
   }
 }

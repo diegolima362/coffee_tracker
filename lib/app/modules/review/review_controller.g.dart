@@ -49,12 +49,18 @@ mixin _$ReviewController on _ReviewControllerBase, Store {
     });
   }
 
-  final _$loadReviewsAsyncAction =
-      AsyncAction('_ReviewControllerBase.loadReviews');
+  final _$loadDataAsyncAction = AsyncAction('_ReviewControllerBase.loadData');
 
   @override
-  Future<void> loadReviews() {
-    return _$loadReviewsAsyncAction.run(() => super.loadReviews());
+  Future<void> loadData() {
+    return _$loadDataAsyncAction.run(() => super.loadData());
+  }
+
+  final _$addReviewAsyncAction = AsyncAction('_ReviewControllerBase.addReview');
+
+  @override
+  Future<void> addReview() {
+    return _$addReviewAsyncAction.run(() => super.addReview());
   }
 
   final _$_ReviewControllerBaseActionController =
@@ -72,11 +78,11 @@ mixin _$ReviewController on _ReviewControllerBase, Store {
   }
 
   @override
-  void addReview() {
+  void sortBy(SortBy value) {
     final _$actionInfo = _$_ReviewControllerBaseActionController.startAction(
-        name: '_ReviewControllerBase.addReview');
+        name: '_ReviewControllerBase.sortBy');
     try {
-      return super.addReview();
+      return super.sortBy(value);
     } finally {
       _$_ReviewControllerBaseActionController.endAction(_$actionInfo);
     }

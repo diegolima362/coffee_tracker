@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'storage_repository.dart';
+part of 'firestore_storage_repository.dart';
 
 // **************************************************************************
 // InjectionGenerator
 // **************************************************************************
 
-final $StorageRepository = BindInject(
-  (i) => StorageRepository(),
+final $FireStoreStorageRepository = BindInject(
+  (i) => FireStoreStorageRepository(),
   singleton: true,
   lazy: true,
 );

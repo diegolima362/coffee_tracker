@@ -19,55 +19,65 @@ final $RestaurantController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$RestaurantController on _RestaurantControllerBase, Store {
-  Computed<Future<List<RestaurantModel>>> _$allRestaurantsComputed;
-
-  @override
-  Future<List<RestaurantModel>> get allRestaurants =>
-      (_$allRestaurantsComputed ??= Computed<Future<List<RestaurantModel>>>(
-              () => super.allRestaurants,
-              name: '_RestaurantControllerBase.allRestaurants'))
-          .value;
-
   final _$restaurantsAtom = Atom(name: '_RestaurantControllerBase.restaurants');
 
   @override
-  List<RestaurantModel> get restaurants {
+  ObservableList<RestaurantModel> get restaurants {
     _$restaurantsAtom.reportRead();
     return super.restaurants;
   }
 
   @override
-  set restaurants(List<RestaurantModel> value) {
+  set restaurants(ObservableList<RestaurantModel> value) {
     _$restaurantsAtom.reportWrite(value, super.restaurants, () {
       super.restaurants = value;
     });
   }
 
-  final _$isDarkAtom = Atom(name: '_RestaurantControllerBase.isDark');
+  final _$isLoadingAtom = Atom(name: '_RestaurantControllerBase.isLoading');
 
   @override
-  bool get isDark {
-    _$isDarkAtom.reportRead();
-    return super.isDark;
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
   }
 
   @override
-  set isDark(bool value) {
-    _$isDarkAtom.reportWrite(value, super.isDark, () {
-      super.isDark = value;
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
+      super.isLoading = value;
     });
   }
 
-  final _$_loadDataAsyncAction =
-      AsyncAction('_RestaurantControllerBase._loadData');
+  final _$loadDataAsyncAction =
+      AsyncAction('_RestaurantControllerBase.loadData');
 
   @override
-  Future<void> _loadData() {
-    return _$_loadDataAsyncAction.run(() => super._loadData());
+  Future<void> loadData() {
+    return _$loadDataAsyncAction.run(() => super.loadData());
+  }
+
+  final _$addRestaurantAsyncAction =
+      AsyncAction('_RestaurantControllerBase.addRestaurant');
+
+  @override
+  Future<void> addRestaurant() {
+    return _$addRestaurantAsyncAction.run(() => super.addRestaurant());
   }
 
   final _$_RestaurantControllerBaseActionController =
       ActionController(name: '_RestaurantControllerBase');
+
+  @override
+  void sortBy(SortBy value) {
+    final _$actionInfo = _$_RestaurantControllerBaseActionController
+        .startAction(name: '_RestaurantControllerBase.sortBy');
+    try {
+      return super.sortBy(value);
+    } finally {
+      _$_RestaurantControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void showDetails({@required RestaurantModel restaurant}) {
@@ -84,8 +94,7 @@ mixin _$RestaurantController on _RestaurantControllerBase, Store {
   String toString() {
     return '''
 restaurants: ${restaurants},
-isDark: ${isDark},
-allRestaurants: ${allRestaurants}
+isLoading: ${isLoading}
     ''';
   }
 }
