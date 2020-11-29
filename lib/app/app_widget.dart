@@ -1,3 +1,4 @@
+import 'package:coffee_tracker/app/shared/themes/custom_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -25,10 +26,12 @@ class AppWidget extends StatelessWidget {
         child: MaterialApp(
           navigatorKey: Modular.navigatorKey,
           title: 'Coffee Tracker',
-          theme: controller.themeType,
           themeMode: controller.themeMode,
           initialRoute: '/',
           onGenerateRoute: Modular.generateRoute,
+          theme: controller.themeMode == ThemeMode.dark
+              ? CustomThemes.dark
+              : CustomThemes.light,
         ),
       ),
     );
