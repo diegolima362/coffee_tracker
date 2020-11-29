@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:coffee_tracker/app/utils/platform_widget.dart';
+import 'package:coffee_tracker/app/shared/components/platform_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

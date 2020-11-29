@@ -1,4 +1,4 @@
-import 'package:coffee_tracker/app/utils/platform_alert_dialog.dart';
+import 'package:coffee_tracker/app/shared/components/platform_alert_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 

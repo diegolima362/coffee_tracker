@@ -35,7 +35,9 @@ class ListItemsBuilder<T> extends StatelessWidget {
       final List<T> items = snapshot.data;
 
       if (items.isNotEmpty) {
-        return filter != null ? _buildList(filter(items)) : _buildList(items);
+        return filter != null
+            ? _buildList(filter(items), context)
+            : _buildList(items, context);
       } else {
         return emptyWidget ??
             EmptyContent(title: emptyTitle, message: emptyMessage);
@@ -52,16 +54,30 @@ class ListItemsBuilder<T> extends StatelessWidget {
     return Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildList(List<T> items) {
+  Widget _buildList(List<T> items, BuildContext context) {
     if (items == null || items.isEmpty) {
       return EmptyContent(message: emptyMessage, title: emptyTitle);
     }
 
-    return ListView.builder(
-      scrollDirection: horizontal ? Axis.horizontal : Axis.vertical,
-      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8.0),
-      itemCount: items.length,
-      itemBuilder: (context, index) => itemBuilder(context, items[index]),
-    );
+    final ratio = MediaQuery.of(context).size.aspectRatio;
+
+    if (ratio > 1 && !horizontal) {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: MediaQuery.of(context).size.width /
+              (MediaQuery.of(context).size.height / 2),
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, index) => itemBuilder(context, items[index]),
+      );
+    } else {
+      return ListView.builder(
+        scrollDirection: horizontal ? Axis.horizontal : Axis.vertical,
+        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8.0),
+        itemCount: items.length,
+        itemBuilder: (context, index) => itemBuilder(context, items[index]),
+      );
+    }
   }
 }
