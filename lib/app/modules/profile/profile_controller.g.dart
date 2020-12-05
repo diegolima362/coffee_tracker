@@ -49,11 +49,33 @@ mixin _$ProfileController on _ProfileControllerBase, Store {
     });
   }
 
+  final _$darkAtom = Atom(name: '_ProfileControllerBase.dark');
+
+  @override
+  bool get dark {
+    _$darkAtom.reportRead();
+    return super.dark;
+  }
+
+  @override
+  set dark(bool value) {
+    _$darkAtom.reportWrite(value, super.dark, () {
+      super.dark = value;
+    });
+  }
+
   final _$logoutAsyncAction = AsyncAction('_ProfileControllerBase.logout');
 
   @override
   Future<void> logout() {
     return _$logoutAsyncAction.run(() => super.logout());
+  }
+
+  final _$setDarkAsyncAction = AsyncAction('_ProfileControllerBase.setDark');
+
+  @override
+  Future<void> setDark(bool value) {
+    return _$setDarkAsyncAction.run(() => super.setDark(value));
   }
 
   final _$_ProfileControllerBaseActionController =
@@ -74,7 +96,8 @@ mixin _$ProfileController on _ProfileControllerBase, Store {
   String toString() {
     return '''
 user: ${user},
-isOffline: ${isOffline}
+isOffline: ${isOffline},
+dark: ${dark}
     ''';
   }
 }

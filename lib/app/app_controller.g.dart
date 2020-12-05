@@ -56,6 +56,13 @@ mixin _$AppController on _AppControllerBase, Store {
     });
   }
 
+  final _$loadThemeAsyncAction = AsyncAction('_AppControllerBase.loadTheme');
+
+  @override
+  Future<void> loadTheme() {
+    return _$loadThemeAsyncAction.run(() => super.loadTheme());
+  }
+
   @override
   String toString() {
     return '''

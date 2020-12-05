@@ -86,11 +86,22 @@ mixin _$AuthController on _AuthControllerBase, Store {
       ActionController(name: '_AuthControllerBase');
 
   @override
-  dynamic setUser(User value) {
+  void setUser(User value) {
     final _$actionInfo = _$_AuthControllerBaseActionController.startAction(
         name: '_AuthControllerBase.setUser');
     try {
       return super.setUser(value);
+    } finally {
+      _$_AuthControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void alertHandled() {
+    final _$actionInfo = _$_AuthControllerBaseActionController.startAction(
+        name: '_AuthControllerBase.alertHandled');
+    try {
+      return super.alertHandled();
     } finally {
       _$_AuthControllerBaseActionController.endAction(_$actionInfo);
     }
