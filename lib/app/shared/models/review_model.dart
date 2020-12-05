@@ -20,7 +20,7 @@ class ReviewModel {
     @required this.text,
   });
 
-  String getShareText(String userName) {
+  String getRecommendationText(String userName) {
     final review = StringBuffer(
         '$userName compartilhou uma experiencia sobre ${Format.capitalString(restaurantName)}');
 

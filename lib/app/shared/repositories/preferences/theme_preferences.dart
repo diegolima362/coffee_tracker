@@ -12,4 +12,12 @@ class DarkThemePreference {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool(THEME_STATUS) ?? false;
   }
+
+  Future<void> clearData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    print('> clearing data');
+    await prefs.clear();
+    print('> data cleared');
+  }
 }

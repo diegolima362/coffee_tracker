@@ -16,17 +16,22 @@ abstract class _LoginControllerBase with Store {
 
   @action
   Future loginWithGoogle() async {
+    loading = true;
+
     try {
-      loading = true;
       await auth.loginWithGoogle();
-      if (auth.status == AuthStatus.loggedOn)
+
+      loading = false;
+
+      if (auth.status == AuthStatus.loggedOn) {
         Modular.to.pushReplacementNamed('/home');
+      }
     } on PlatformException {
       loading = false;
       rethrow;
     } catch (e) {
       loading = false;
-      print(e);
+      rethrow;
     }
   }
 

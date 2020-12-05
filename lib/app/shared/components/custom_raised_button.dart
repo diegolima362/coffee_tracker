@@ -19,10 +19,12 @@ class CustomRaisedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _color = color ?? Theme.of(context).buttonColor;
+
     return SizedBox(
       child: RaisedButton(
         child: child,
-        color: color,
+        color: _color,
         disabledColor: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(

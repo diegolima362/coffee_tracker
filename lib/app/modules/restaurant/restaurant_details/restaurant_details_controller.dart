@@ -86,7 +86,7 @@ abstract class _RestaurantDetailsControllerBase with Store {
     final name = FirebaseAuth.instance.currentUser.displayName;
 
     return {
-      'text': restaurant.getShareText(name),
+      'text': restaurant.getRecommendationText(name),
       'subject': 'Recomendação de Café: ${restaurant.name}',
       'path': path,
     };

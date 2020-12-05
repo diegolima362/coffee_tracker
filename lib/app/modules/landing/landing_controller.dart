@@ -1,4 +1,5 @@
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -9,16 +10,24 @@ class LandingController = _LandingControllerBase with _$LandingController;
 
 abstract class _LandingControllerBase with Store {
   _LandingControllerBase() {
-    final auth = Modular.get<AuthController>();
+    auth = Modular.get<AuthController>();
 
-    auth.onAuthStateChanged.listen((e) {
-      if (e == null) {
-        goToLogin();
+    auth.onAuthStateChanged.listen((User user) {
+      print('> authentication: ${auth.status == AuthStatus.loggedOn}');
+
+      if (user != null) {
+        if (auth.status == AuthStatus.loggedOn) {
+          goToHome();
+        } else if (auth.status == AuthStatus.loggedOut) {
+          goToLogin();
+        }
       } else {
-        goToHome();
+        goToLogin();
       }
     });
   }
+
+  AuthController auth;
 
   @action
   void goToHome() {

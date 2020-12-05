@@ -26,6 +26,7 @@ class CustomThemes {
       indicatorColor: textColor,
       backgroundColor: white,
       primaryColor: primary,
+      buttonColor: buttonColor,
       buttonTheme: ButtonThemeData(
         buttonColor: buttonColor,
         textTheme: ButtonTextTheme.primary,
@@ -105,6 +106,7 @@ class CustomThemes {
       toggleableActiveColor: accent,
       backgroundColor: dark,
       primaryColor: primary,
+      buttonColor: buttonColor,
       buttonTheme: ButtonThemeData(
         buttonColor: buttonColor,
         textTheme: ButtonTextTheme.primary,

@@ -28,7 +28,7 @@ abstract class _ReviewDetailsControllerBase with Store {
     final name = FirebaseAuth.instance.currentUser.displayName;
 
     return {
-      'text': review.getShareText(name),
+      'text': review.getRecommendationText(name),
       'subject': 'Avaliação de Café: ${review.restaurantName}',
     };
   }

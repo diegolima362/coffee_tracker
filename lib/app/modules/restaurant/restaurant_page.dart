@@ -2,6 +2,7 @@ import 'package:coffee_tracker/app/modules/restaurant/components/restaurant_info
 import 'package:coffee_tracker/app/modules/restaurant/sort_by.dart';
 import 'package:coffee_tracker/app/shared/components/empty_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -41,7 +42,7 @@ class _RestaurantPageState
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         tooltip: 'Adicionar Restaurante',
-        onPressed: controller.addRestaurant,
+        onPressed: _addRestaurant,
       ),
       body: Observer(
         builder: _buildContent,
@@ -54,7 +55,7 @@ class _RestaurantPageState
       icon: Icon(Icons.sort_sharp),
       onSelected: (value) => controller.sortBy(value),
       itemBuilder: (BuildContext context) {
-        final choices = ['A-Z', 'Nota', 'Data', 'Cidade'];
+        final choices = ['A-Z', 'Nota', 'Data', 'Cidade', 'Visitas'];
         return choices.map((String choice) {
           return PopupMenuItem<SortBy>(
             value: SortBy.values[choices.indexOf(choice)],
@@ -98,6 +99,24 @@ class _RestaurantPageState
           );
         },
       );
+    }
+  }
+
+  Future<void> _addRestaurant() async {
+    try {
+      await controller.addRestaurant();
+    } on PlatformException {
+      final snackBar = SnackBar(
+        content: Text(
+          'Sem conexão com a internet',
+          style: TextStyle(color: Theme.of(context).backgroundColor),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: Theme.of(context).accentColor,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } catch (e) {
+      print(e);
     }
   }
 }

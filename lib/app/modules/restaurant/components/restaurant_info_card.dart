@@ -102,7 +102,7 @@ class RestaurantInfoCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${Format.capitalString(restaurant.city)}, ${restaurant.state.toUpperCase()}',
+                      '${Format.capitalString(restaurant.city.trim())}, ${restaurant.state.trim().toUpperCase()}',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: subtitleColor, fontSize: 12),
                     ),

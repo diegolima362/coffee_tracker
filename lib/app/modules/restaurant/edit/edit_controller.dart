@@ -137,13 +137,13 @@ abstract class _EditControllerBase with Store {
     return RestaurantModel(
       id: _id,
       registerDate: _registerDate,
-      name: name,
-      city: city,
-      address: address,
-      state: state,
+      name: name.trim(),
+      city: city.trim(),
+      address: address.trim(),
+      state: state.trim(),
       favorite: restaurant?.favorite ?? false,
       fileName: fileName,
-      commentary: commentary,
+      commentary: commentary.trim(),
     );
   }
 

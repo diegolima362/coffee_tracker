@@ -22,6 +22,12 @@ class CheckConnection {
         code: 'error_connection',
         details: e.toString(),
       );
+    } catch (e) {
+      throw PlatformException(
+        message: 'Problemas na conexão',
+        code: 'error_connection',
+        details: e.toString(),
+      );
     }
     return false;
   }

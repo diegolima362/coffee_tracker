@@ -41,9 +41,15 @@ abstract class _ProfileControllerBase with Store {
 
   @action
   Future<void> logout() async {
-    mediaCache.flush();
+    await _clearData();
+
     await Modular.get<AuthController>().logout();
     Modular.to.pushReplacementNamed('/login');
+  }
+
+  Future<void> _clearData() async {
+    mediaCache.flush();
+    await darkThemePreference.clearData();
   }
 
   @action

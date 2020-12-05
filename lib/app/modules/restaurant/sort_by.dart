@@ -3,4 +3,5 @@ enum SortBy {
   RATE,
   DATE,
   CITY,
+  NUM_REVIEWS,
 }

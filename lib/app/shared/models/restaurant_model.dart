@@ -15,10 +15,6 @@ class RestaurantModel {
 
   List<ReviewModel> _reviews;
 
-  double get rate => _reviews.isEmpty
-      ? 0
-      : _reviews.fold(0, (v, r) => v += r.rate) / _reviews.length;
-
   RestaurantModel({
     @required this.id,
     @required this.registerDate,
@@ -35,7 +31,17 @@ class RestaurantModel {
 
   List<ReviewModel> get allReviews => _reviews;
 
-  String getShareText(String userName) {
+  double get rate {
+    if (_reviews.isEmpty) {
+      return 0;
+    } else {
+      return _reviews.fold(0, (v, r) => v += r.rate) / _reviews.length;
+    }
+  }
+
+  int get totalVisits => _reviews.length;
+
+  String getRecommendationText(String userName) {
     final text = StringBuffer(
         '$userName acha que você vai gostar de ir ao ${Format.capitalString(name)}');
 

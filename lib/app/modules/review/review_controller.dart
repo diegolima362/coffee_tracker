@@ -47,14 +47,17 @@ abstract class _ReviewControllerBase with Store {
 
   @action
   Future<void> addReview() async {
-    final IStorageRepository storage = Modular.get();
-    final data = await storage.getAllRestaurants();
-
-    if (data.isEmpty) {
+    if (!await hasRestaurants) {
       print('> empty data');
     } else {
       Modular.to.pushNamed('review/edit', arguments: null);
     }
+  }
+
+  Future<bool> get hasRestaurants async {
+    final IStorageRepository storage = Modular.get();
+    final data = await storage.getAllRestaurants();
+    return data.isNotEmpty;
   }
 
   @action

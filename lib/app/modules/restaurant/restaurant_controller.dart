@@ -47,6 +47,8 @@ abstract class _RestaurantControllerBase with Store {
           .sort((a, b) => a.city.toLowerCase().compareTo(b.city.toLowerCase()));
     } else if (value == SortBy.DATE) {
       restaurants.sort((a, b) => a.registerDate.compareTo(b.registerDate));
+    } else if (value == SortBy.NUM_REVIEWS) {
+      restaurants.sort((a, b) => b.totalVisits.compareTo(a.totalVisits));
     }
   }
 
@@ -79,8 +81,8 @@ abstract class _RestaurantControllerBase with Store {
     try {
       if (await CheckConnection.checkConnection())
         Modular.to.pushNamed('restaurant/edit', arguments: null);
-    } on PlatformException catch (e) {
-      print(e);
+    } on PlatformException {
+      rethrow;
     } catch (error) {
       print(error);
     }

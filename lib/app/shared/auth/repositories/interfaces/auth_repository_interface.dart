@@ -20,5 +20,7 @@ abstract class IAuthRepository implements Disposable {
 
   bool emailVerified();
 
+  User get currentUser;
+
   Future<bool> validateCode(String code);
 }

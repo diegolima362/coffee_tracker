@@ -40,7 +40,7 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
       floatingActionButton: FloatingActionButton(
         tooltip: 'Adicionar Review',
         child: Icon(Icons.add),
-        onPressed: controller.addReview,
+        onPressed: _addReview,
       ),
       body: Observer(
         builder: _buildContent,
@@ -102,6 +102,22 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
           );
         },
       );
+    }
+  }
+
+  Future<void> _addReview() async {
+    if (!await controller.hasRestaurants) {
+      final snackBar = SnackBar(
+        content: Text(
+          'Sem Restaurantes registrados',
+          style: TextStyle(color: Theme.of(context).backgroundColor),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: Theme.of(context).accentColor,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      await controller.addReview();
     }
   }
 }

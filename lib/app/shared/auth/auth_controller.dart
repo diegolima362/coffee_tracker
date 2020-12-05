@@ -8,40 +8,53 @@ import 'repositories/interfaces/auth_repository_interface.dart';
 
 part 'auth_controller.g.dart';
 
+enum AuthStatus { waiting, loggedOn, loggedOut }
+
 class AuthController = _AuthControllerBase with _$AuthController;
 
 abstract class _AuthControllerBase with Store {
-  final IAuthRepository _authRepository = Modular.get();
+  _AuthControllerBase() {
+    _authRepository = Modular.get();
+
+    status = _authRepository.currentUser == null
+        ? AuthStatus.loggedOut
+        : AuthStatus.loggedOn;
+
+    print('> user : ${_authRepository.currentUser}');
+
+    _authRepository.getUser().listen((u) {
+      setUser(u);
+    });
+  }
+
+  IAuthRepository _authRepository;
+
+  @observable
+  AuthStatus status;
+
+  @observable
+  User user;
 
   bool get isEmailVerified => _authRepository.emailVerified();
 
   Future<bool> validateCode(String code) async =>
       await _authRepository.validateCode(code);
 
-  @observable
-  AuthStatus status = AuthStatus.loading;
-
-  @observable
-  User user;
-
-  _AuthControllerBase() {
-    _authRepository.getUser().listen((u) {
-      setUser(u);
-    });
-  }
+  @action
+  void setUser(User value) => user = value;
 
   @action
-  setUser(User value) {
-    user = value;
-    status = user == null ? AuthStatus.loggedOut : AuthStatus.loggedOn;
-  }
+  void alertHandled() => status = AuthStatus.loggedOut;
 
   @action
   Future loginWithGoogle() async {
-    status = AuthStatus.loading;
+    status = AuthStatus.waiting;
     try {
       user = await _authRepository.getGoogleLogin();
-      status = AuthStatus.loggedOn;
+      if (user?.uid != null)
+        status = AuthStatus.loggedOn;
+      else
+        status = AuthStatus.loggedOut;
     } on PlatformException {
       status = AuthStatus.loggedOut;
       rethrow;
@@ -56,14 +69,20 @@ abstract class _AuthControllerBase with Store {
     @required String email,
     @required String password,
   }) async {
-    status = AuthStatus.loading;
+    status = AuthStatus.waiting;
 
     try {
       user = await _authRepository.getEmailPasswordLogin(
         email: email,
         password: password,
       );
-      status = AuthStatus.loggedOn;
+
+      if (user.emailVerified) {
+        status = AuthStatus.loggedOn;
+      } else {
+        // user.sendEmailVerification();
+        // status = AuthStatus.loggedOut;
+      }
     } on PlatformException {
       status = AuthStatus.loggedOut;
       rethrow;
@@ -75,20 +94,23 @@ abstract class _AuthControllerBase with Store {
     @required String email,
     @required String password,
   }) async {
-    status = AuthStatus.loading;
+    status = AuthStatus.waiting;
     try {
       user = await _authRepository.getEmailPasswordSignUp(
         email: email,
         password: password,
       );
     } on PlatformException {
+      status = AuthStatus.loggedOut;
+      rethrow;
+    } catch (e) {
       rethrow;
     }
   }
 
   @action
   Future resetPassword(String email) async {
-    status = AuthStatus.loading;
+    status = AuthStatus.waiting;
     try {
       await _authRepository.resetPassword(email);
       status = AuthStatus.loggedOut;
@@ -101,9 +123,11 @@ abstract class _AuthControllerBase with Store {
   @action
   Future<void> logout() async {
     try {
+      status = AuthStatus.waiting;
       await _authRepository.getLogout();
       status = AuthStatus.loggedOut;
     } on PlatformException {
+      status = AuthStatus.loggedOut;
       rethrow;
     }
   }
@@ -111,4 +135,4 @@ abstract class _AuthControllerBase with Store {
   Stream<User> get onAuthStateChanged => _authRepository.onAuthStateChanged;
 }
 
-enum AuthStatus { loading, loggedOn, loggedOut }
+class VerifyEmailAlert implements Exception {}

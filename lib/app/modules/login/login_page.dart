@@ -1,5 +1,6 @@
 import 'package:coffee_tracker/app/modules/login/components/sign_in_button.dart';
 import 'package:coffee_tracker/app/modules/login/components/social_sign_in_button.dart';
+import 'package:coffee_tracker/app/shared/components/alert_widget.dart';
 import 'package:coffee_tracker/app/shared/components/platform_exception_alert_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,20 +33,12 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Erro no login'),
-              content: Text(e.message),
-              actions: [
-                FlatButton(
-                  child: Text('OK'),
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            );
-          },
+          builder: (context) =>
+              AlertWidget(title: 'Erro no login', content: null),
         );
       }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -53,7 +46,7 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
   Widget build(BuildContext context) {
     final ratio = MediaQuery.of(context).size.aspectRatio;
     final width = MediaQuery.of(context).size.width;
-    final buttonColor = Color(0xFF274C77);
+    final buttonColor = Theme.of(context).buttonColor;
 
     return Scaffold(
       appBar: AppBar(),
@@ -65,10 +58,8 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  height: 100,
-                  child: _buildHeader(),
-                ),
+                Observer(builder: (_) => _buildHeader()),
+                const SizedBox(height: 20),
                 SocialSignInButton(
                   color: buttonColor,
                   textColor: Color(0xFFE7ECEF),

@@ -52,8 +52,13 @@ class MediaInfo {
 }
 
 class MediaCache {
+  MediaCache() {
+    loadCache();
+  }
+
   Directory _tempDir;
   Directory _docsDir;
+  Directory _imagesDir;
   Directory cachePath;
   File cacheFile;
 
@@ -67,6 +72,8 @@ class MediaCache {
     print('> loading cache ...');
     _tempDir = await getTemporaryDirectory();
     _docsDir = await getApplicationDocumentsDirectory();
+
+    _imagesDir = Directory('${docsDir.path}/mediacache/images');
 
     cache = {};
 
@@ -108,6 +115,16 @@ class MediaCache {
       print('> file exists');
       if (cache.containsKey(id)) {
         cache[id].accessed = DateTime.now();
+      } else {
+        cache[id] = MediaInfo(
+          id: id,
+          source: source,
+          restaurantId: restaurantId,
+          type: 'image/jpeg',
+          size: await file.length(),
+          accessed: DateTime.now(),
+          synced: true,
+        );
       }
       return Image.file(file, fit: BoxFit.cover);
     } else {
@@ -136,6 +153,7 @@ class MediaCache {
       );
 
       this.saveCache();
+      this.loadCache();
 
       return Image.file(file, fit: BoxFit.cover);
     }
@@ -156,8 +174,8 @@ class MediaCache {
 
     int size = file.lengthSync();
 
-    print('> file: ${cachePath.path}/$id');
-    file.copySync('${cachePath.path}/$id');
+    print('> file: ${_imagesDir.path}/$id');
+    file.copySync('${_imagesDir.path}/$id');
 
     file.deleteSync();
 
@@ -175,10 +193,10 @@ class MediaCache {
   }
 
   void deleteRestaurantImage({String id, String restaurantId}) {
-    print('> file ${cachePath.path}/$id');
+    print('> file ${_imagesDir.path}/$id');
 
     if (cache.containsKey(id)) {
-      final file = File('${cachePath.path}/$id');
+      final file = File('${_imagesDir.path}/$id');
       final uid = FirebaseAuth.instance.currentUser.uid;
       final ref = firebase_storage.FirebaseStorage.instance
           .ref('users/$uid/restaurants/$id');
@@ -231,10 +249,10 @@ class MediaCache {
     MediaInfo mediaInfo = getNotSynced();
 
     if (mediaInfo != null) {
-      print('> sync file: ${cachePath.path}/${mediaInfo.id}');
+      print('> sync file: ${_imagesDir.path}/${mediaInfo.id}');
       // ${cachePath.path}/$id
 
-      final file = File('${cachePath.path}/${mediaInfo.id}');
+      final file = File('${_imagesDir.path}/${mediaInfo.id}');
 
       if (file.existsSync()) {
         print('> exists');
@@ -281,18 +299,21 @@ class MediaCache {
   }
 
   void flush() {
-    if (tempDir.existsSync()) {
-      print('> flush cache');
-      for (MediaInfo mi in cache.values) {
-        final f = File('${cachePath.path}/${mi.id}');
-        if (f.existsSync()) {
-          print('> delete file: ${cachePath.path}/${mi.id}');
-          f.deleteSync();
-        }
-      }
+    print('> flush cache');
 
-      cacheFile.deleteSync();
-      loadCache();
+    if (tempDir.existsSync()) {
+      tempDir.deleteSync(recursive: true);
     }
+
+    if (_imagesDir.existsSync()) {
+      _imagesDir.deleteSync(recursive: true);
+    }
+
+    if (cachePath.existsSync()) {
+      cachePath.deleteSync(recursive: true);
+    }
+
+    loadCache();
+    print('> cache clear');
   }
 }

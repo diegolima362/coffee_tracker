@@ -22,7 +22,7 @@ class FormStore = _FormStore with _$FormStore;
 abstract class _FormStore with Store {
   final FormErrorState error = FormErrorState();
 
-  AuthController auth = Modular.get();
+  AuthController _auth = Modular.get();
 
   @observable
   CustomColor color;
@@ -103,42 +103,56 @@ abstract class _FormStore with Store {
     validateEmail(email);
   }
 
+  Future<void> close() async {
+    print('> close email sign in form');
+    await Modular.to.pushReplacementNamed('/login');
+  }
+
   @action
   Future<void> submit() async {
     loading = true;
 
     try {
       if (this.formType == SignFormType.signIn) {
-        await auth.loginWithEmail(
+        await _auth.loginWithEmail(
           email: email.trim(),
           password: password.trim(),
         );
       } else {
-        await auth.signUpWithEmail(
+        await _auth.signUpWithEmail(
           email: email.trim(),
           password: password.trim(),
         );
       }
+
+      loading = false;
+    } on VerifyEmailAlert {
+      rethrow;
     } on PlatformException {
+      loading = false;
       rethrow;
     } on Exception catch (e) {
+      loading = false;
       throw PlatformException(
         code: 'ERROR_SIGN_IN',
         details: e.toString(),
       );
-    } finally {
-      loading = false;
     }
   }
 
-  bool get isEmailVerified => auth.isEmailVerified;
+  bool get isEmailVerified => _auth.isEmailVerified;
 
-  Future<bool> validateCode(String code) async => await auth.validateCode(code);
+  bool get loggedIn => _auth.status == AuthStatus.loggedOn;
+
+  Future<bool> validateCode(String code) async =>
+      await _auth.validateCode(code);
+
+  void alertHandled() => _auth.alertHandled();
 
   void resetPassword() {
     Modular.link.pushReplacementNamed(
       'reset_password',
-      arguments: auth,
+      arguments: _auth,
     );
   }
 }
