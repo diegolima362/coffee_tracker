@@ -44,7 +44,7 @@ abstract class _RestaurantDetailsControllerBase with Store {
 
     final IStorageRepository storage = Modular.get();
 
-    storage.persistRestaurant(restaurant);
+    storage.updateRestaurant(restaurant);
 
     loadImage('${restaurant.id}.jpg');
   }

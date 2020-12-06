@@ -49,7 +49,7 @@ class FireStoreStorageRepository implements IStorageRepository {
         .get();
 
     _restaurants = data.docs.map((d) {
-      final model = RestaurantModel.fromJson(d.data());
+      final model = RestaurantModel.fromMap(d.data());
 
       if (_reviews != null && _reviews.isNotEmpty) {
         _reviews.forEach((r) {
@@ -71,9 +71,65 @@ class FireStoreStorageRepository implements IStorageRepository {
     final data =
         await FirebaseFirestore.instance.collection('users/$uid/reviews').get();
 
-    _reviews = data.docs.map((d) => ReviewModel.fromJson(d.data())).toList();
+    _reviews = data.docs.map((d) => ReviewModel.fromMap(d.data())).toList();
 
     return _reviews;
+  }
+
+  @override
+  Future<void> updateRestaurant(RestaurantModel restaurant) async {
+    final uid = FirebaseAuth.instance.currentUser.uid;
+    final ref = FirebaseFirestore.instance
+        .doc('users/$uid/restaurants/${restaurant.id}');
+
+    final map = (await ref.get()).data();
+    RestaurantModel temp = RestaurantModel.fromMap(map);
+
+    if (temp.name != restaurant.name) {
+      _reviews.forEach((r) {
+        if (r.restaurantId == restaurant.id) {
+          r.restaurantName = restaurant.name;
+          updateReview(r);
+        }
+      });
+    }
+
+    ref.update({
+      if (temp.address != restaurant.address) 'address': restaurant.address,
+      if (temp.city != restaurant.city) 'city': restaurant.city,
+      if (temp.commentary != restaurant.commentary)
+        'commentary': restaurant.commentary,
+      if (temp.favorite != restaurant.favorite) 'favorite': restaurant.favorite,
+      if (temp.fileName != restaurant.fileName) 'fileName': restaurant.fileName,
+      if (temp.name != restaurant.name) 'name': restaurant.name,
+      if (temp.state != restaurant.state) 'state': restaurant.state,
+    }).then((value) {
+      print('> restaurant updated');
+      print(restaurant);
+    }).catchError((error) => print('> failed to update restaurant: $error'));
+  }
+
+  @override
+  Future<void> updateReview(ReviewModel review) async {
+    final uid = FirebaseAuth.instance.currentUser.uid;
+    final ref =
+        FirebaseFirestore.instance.doc('users/$uid/reviews/${review.id}');
+
+    final map = (await ref.get()).data();
+    ReviewModel temp = ReviewModel.fromMap(map);
+
+    print(temp);
+
+    ref.update({
+      if (temp.rate != review.rate) 'rate': review.rate,
+      if (temp.restaurantName != review.restaurantName)
+        'restaurantName': review.restaurantName,
+      if (temp.visitDate != review.visitDate) 'visitDate': review.visitDate,
+      if (temp.text != review.text) 'text': review.text
+    }).then((value) {
+      print('> review updated');
+      print(review);
+    }).catchError((error) => print('> failed to update review: $error'));
   }
 
   @override
@@ -81,7 +137,8 @@ class FireStoreStorageRepository implements IStorageRepository {
     final uid = FirebaseAuth.instance.currentUser.uid;
     final ref = FirebaseFirestore.instance
         .doc('users/$uid/restaurants/${restaurant.id}');
-    return ref.set(restaurant.toJson()).then((value) {
+
+    return ref.set(restaurant.toMap()).then((value) {
       print('> restaurant synced');
       print(restaurant);
     }).catchError((error) => print('> failed to add restaurant: $error'));
@@ -92,7 +149,7 @@ class FireStoreStorageRepository implements IStorageRepository {
     final uid = FirebaseAuth.instance.currentUser.uid;
     final ref =
         FirebaseFirestore.instance.doc('users/$uid/reviews/${review.id}');
-    return ref.set(review.toJson()).then((value) {
+    return ref.set(review.toMap()).then((value) {
       print('> review synced');
       print(review);
     }).catchError((error) => print('> failed to add review: $error'));

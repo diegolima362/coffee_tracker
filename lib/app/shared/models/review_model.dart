@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 class ReviewModel {
   final String id;
   final String restaurantId;
-  final String restaurantName;
+  String restaurantName;
   final DateTime reviewDate;
   DateTime visitDate;
   String text;
@@ -31,22 +31,22 @@ class ReviewModel {
     return review.toString();
   }
 
-  factory ReviewModel.fromJson(Map<String, dynamic> json) {
-    final _reviewDate = DateTime.fromMillisecondsSinceEpoch(json['reviewDate']);
-    final _visitDate = DateTime.fromMillisecondsSinceEpoch(json['visitDate']);
+  factory ReviewModel.fromMap(Map<String, dynamic> map) {
+    final _reviewDate = DateTime.fromMillisecondsSinceEpoch(map['reviewDate']);
+    final _visitDate = DateTime.fromMillisecondsSinceEpoch(map['visitDate']);
 
     return ReviewModel(
-      id: json['id'],
-      restaurantId: json['restaurantId'],
-      restaurantName: json['restaurantName'],
+      id: map['id'],
+      restaurantId: map['restaurantId'],
+      restaurantName: map['restaurantName'],
       reviewDate: _reviewDate,
       visitDate: _visitDate,
-      rate: json['rate'],
-      text: json['text'],
+      rate: map['rate'],
+      text: map['text'],
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         'id': id,
         'restaurantName': restaurantName,
         'restaurantId': restaurantId,

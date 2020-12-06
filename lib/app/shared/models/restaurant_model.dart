@@ -59,40 +59,22 @@ class RestaurantModel {
 
   void addReviews(List<ReviewModel> reviews) => _reviews.addAll(reviews);
 
-  factory RestaurantModel.fromMap(
-      Map<String, dynamic> data, String documentId) {
-    if (data == null) return null;
-
+  factory RestaurantModel.fromMap(Map<String, dynamic> map) {
     return RestaurantModel(
-      id: data['id'] ?? '',
-      name: data['name'] ?? '',
-      address: data['address'] ?? '',
-      city: data['city'] ?? '',
-      state: data['state'] ?? '',
-      fileName: data['fileName'] ?? '',
-      favorite: data['favorite'] ?? false,
-      commentary: data['commentary'] ?? '',
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      address: map['address'] ?? '',
+      city: map['city'] ?? '',
+      state: map['state'] ?? '',
+      fileName: map['fileName'] ?? '',
+      favorite: map['favorite'] ?? false,
+      commentary: map['commentary'] ?? '',
       registerDate: DateTime.fromMillisecondsSinceEpoch(
-          data['registerDate'] ?? DateTime.now().millisecondsSinceEpoch),
+          map['registerDate'] ?? DateTime.now().millisecondsSinceEpoch),
     );
   }
 
-  factory RestaurantModel.fromJson(Map<String, dynamic> json) {
-    return RestaurantModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      address: json['address'] ?? '',
-      city: json['city'] ?? '',
-      state: json['state'] ?? '',
-      fileName: json['fileName'] ?? '',
-      favorite: json['favorite'] ?? false,
-      commentary: json['commentary'] ?? '',
-      registerDate: DateTime.fromMillisecondsSinceEpoch(
-          json['registerDate'] ?? DateTime.now().millisecondsSinceEpoch),
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         'id': id,
         'name': name,
         'address': address ?? '',

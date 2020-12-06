@@ -70,7 +70,7 @@ abstract class _EditControllerBase with Store {
     restaurants.addAll(data);
 
     if (review?.restaurantId != null) {
-      final l = restaurants.where((r) => r.id == review.id).toList();
+      final l = restaurants.where((r) => r.id == review.restaurantId).toList();
       if (l.length > 0) {
         setRestaurant(l[0]);
       } else {
@@ -127,17 +127,19 @@ abstract class _EditControllerBase with Store {
 
   @action
   Future<void> save() async {
-    if (review != null) {
-      final ReviewDetailsController controller = Modular.get();
-      controller.setReview(_reviewFromState());
-    }
-
     final IStorageRepository storage = Modular.get();
-    await storage.persistReview(_reviewFromState());
+    final r = _reviewFromState();
 
-    final ReviewController controller = Modular.get();
-    await controller.loadData();
+    if (review != null) {
+      storage.updateReview(r);
+      final ReviewDetailsController controller = Modular.get();
+      controller.setReview(r);
+    } else {
+      await storage.persistReview(r);
 
+      final ReviewController controller = Modular.get();
+      await controller.loadData();
+    }
     Modular.navigator.pop();
   }
 

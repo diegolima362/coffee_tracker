@@ -190,7 +190,7 @@ abstract class _EditControllerBase with Store {
       controller.restaurant.address = r.address.trim();
       controller.restaurant.commentary = r.commentary.trim();
 
-      await storage.persistRestaurant(r);
+      await storage.updateRestaurant(r);
       controller.reload();
     } else {
       await storage.persistRestaurant(r);
