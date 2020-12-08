@@ -98,8 +98,8 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
   Future<void> _submit() async {
     try {
       if (store.canDissmiss) {
-        await _showConfirmDialog();
         await store.submit();
+        await _showConfirmDialog();
         Modular.to.pushReplacementNamed('/login/email_sign_in');
       }
     } on PlatformException catch (e) {

@@ -1,6 +1,6 @@
+import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -25,7 +25,8 @@ abstract class _ReviewDetailsControllerBase with Store {
   void setReview(ReviewModel r) => review = r;
 
   Map<String, String> get shareData {
-    final name = FirebaseAuth.instance.currentUser.displayName;
+    final auth = Modular.get<AuthController>();
+    final name = auth.user.displayName;
 
     return {
       'text': review.getRecommendationText(name),

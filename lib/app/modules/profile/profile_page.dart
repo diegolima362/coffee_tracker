@@ -1,5 +1,6 @@
 import 'package:coffee_tracker/app/shared/components/avatar.dart';
 import 'package:coffee_tracker/app/shared/components/platform_alert_dialog.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -56,23 +57,21 @@ class _ProfilePageState extends ModularState<ProfilePage, ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).iconTheme.color;
-
     return Scaffold(
         appBar: AppBar(title: Text(widget.title)),
         body: SingleChildScrollView(
           child: Center(
             child: Column(
               children: [
-                const SizedBox(height: 20),
-                buildAvatar(),
-                SizedBox(height: 20),
+                const SizedBox(height: 10),
+                _buildAvatar(),
+                SizedBox(height: 10),
                 Text(
                   controller.user.displayName,
                   style: TextStyle(fontSize: 18),
                 ),
                 FutureBuilder<void>(
-                  future: controller.mediaCache.loadCache(),
+                  future: controller.mediaStorage.loadCache(),
                   builder: (_, __) {
                     if (__.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
@@ -84,49 +83,24 @@ class _ProfilePageState extends ModularState<ProfilePage, ProfileController> {
                             borderRadius: BorderRadius.circular(10.0)),
                         child: Column(
                           children: [
-                            ListTile(
-                              title: Text('Imagens'),
-                              trailing: Text(
-                                '${controller.mediaCache.numberOfPhotos}',
-                              ),
-                            ),
-                            Divider(height: 1.0),
-                            ListTile(
-                              title: Text('Dados salvos'),
-                              trailing: Text(
-                                '${(controller.mediaCache.size / 1024 / 1024).toStringAsFixed(2)} MB',
-                              ),
-                            ),
-                            Divider(height: 1.0),
-                            ListTile(
-                              title: Text('Dados Pendentes'),
-                              trailing: Text(
-                                  '${controller.mediaCache.numberOfPending}'),
-                            ),
-                            Divider(height: 1.0),
-                            ListTile(
-                              title: Text('Sincronizar dados'),
-                              trailing: Icon(
-                                Icons.cloud_upload,
-                                color: color,
-                              ),
-                              onTap: () => controller.mediaCache.synchronize(),
-                            ),
                             Divider(height: 1.0),
                             ListTile(
                               title: Text('Deletar Cache'),
-                              trailing: Icon(
-                                Icons.delete,
-                                color: color,
+                              trailing: Text(
+                                '${(controller.mediaStorage.storageUsage / 1024 / 1024).toStringAsFixed(2)} MB',
                               ),
-                              onTap: () => controller.mediaCache.flush(),
+                              onTap: () => controller.mediaStorage.flushCache(),
                             ),
                             Divider(height: 1.0),
                             ListTile(
                               title: Text('Tema Escuro'),
-                              trailing: Switch(
-                                value: controller.dark,
-                                onChanged: controller.setDark,
+                              trailing: Transform.scale(
+                                scale: 0.8,
+                                child: CupertinoSwitch(
+                                  activeColor: Theme.of(context).accentColor,
+                                  value: controller.dark,
+                                  onChanged: controller.setDark,
+                                ),
                               ),
                             ),
                             Divider(height: 1.0),
@@ -146,7 +120,7 @@ class _ProfilePageState extends ModularState<ProfilePage, ProfileController> {
         ));
   }
 
-  Observer buildAvatar() {
+  Observer _buildAvatar() {
     return Observer(
       builder: (_) {
         if (controller.isOffline == null || !controller.isOffline)

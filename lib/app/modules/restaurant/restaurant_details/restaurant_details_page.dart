@@ -184,7 +184,7 @@ class _RestaurantDetailsPageState
 
     return controller.savedImage != null
         ? GestureDetector(
-            onTap: controller.restaurant.fileName.isNotEmpty
+            onTap: controller.restaurant.imageURL.isNotEmpty
                 ? controller.showFullImage
                 : () {},
             child: Stack(

@@ -2,7 +2,9 @@ import 'package:coffee_tracker/app/modules/review/search_delegate/review_search.
 import 'package:coffee_tracker/app/modules/review/sort_by.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
+import 'package:coffee_tracker/app/utils/connection_state.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -47,10 +49,18 @@ abstract class _ReviewControllerBase with Store {
 
   @action
   Future<void> addReview() async {
-    if (!await hasRestaurants) {
-      print('> empty data');
-    } else {
-      Modular.to.pushNamed('review/edit', arguments: null);
+    try {
+      if (await CheckConnection.checkConnection()) {
+        if (!await hasRestaurants) {
+          print('> empty data');
+        } else {
+          Modular.to.pushNamed('review/edit', arguments: null);
+        }
+      }
+    } on PlatformException {
+      rethrow;
+    } catch (error) {
+      print(error);
     }
   }
 

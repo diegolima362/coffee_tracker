@@ -8,10 +8,7 @@ import 'home_page.dart';
 
 class HomeModule extends ChildModule {
   @override
-  List<Bind> get binds => [
-        Bind((i) => HomeContentController(), singleton: true),
-        Bind((i) => HomeController(), singleton: true),
-      ];
+  List<Bind> get binds => [$HomeContentController, $HomeController];
 
   @override
   List<ModularRouter> get routers => [

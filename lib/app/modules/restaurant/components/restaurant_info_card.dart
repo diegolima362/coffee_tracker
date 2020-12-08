@@ -1,5 +1,5 @@
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
-import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
 
@@ -12,13 +12,13 @@ class RestaurantInfoCard extends StatelessWidget {
   final double opacity;
   final double radius;
   final bool expanded;
-  final MediaCache mediaCache;
+  final IMediaStorageRepository mediaStorage;
   final void Function() onTap;
 
   const RestaurantInfoCard({
     Key key,
     @required this.restaurant,
-    @required this.mediaCache,
+    @required this.mediaStorage,
     this.width,
     this.height,
     this.cardColor,
@@ -62,8 +62,8 @@ class RestaurantInfoCard extends StatelessWidget {
                 color: overlayColor,
                 width: _imageWidth,
                 height: _height,
-                child: restaurant.fileName != null &&
-                        restaurant.fileName.isNotEmpty
+                child: restaurant.imageURL != null &&
+                        restaurant.imageURL.isNotEmpty
                     ? buildImage()
                     : Image.asset(
                         'images/no-image.png',
@@ -102,7 +102,7 @@ class RestaurantInfoCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${Format.capitalString(restaurant.city.trim())}, ${restaurant.state.trim().toUpperCase()}',
+                      '${Format.capitalString(restaurant.city)}, ${restaurant.state.toUpperCase()}',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: subtitleColor, fontSize: 12),
                     ),
@@ -124,6 +124,7 @@ class RestaurantInfoCard extends StatelessWidget {
                     Icon(
                       Icons.star,
                       size: 16,
+                      color: Theme.of(context).textTheme.subtitle2.color,
                     ),
                   ],
                 ),
@@ -135,7 +136,7 @@ class RestaurantInfoCard extends StatelessWidget {
   }
 
   Widget buildImage() {
-    if (restaurant.fileName.isEmpty) {
+    if (restaurant.imageURL.isEmpty) {
       return Image.asset(
         'images/no-image.png',
         fit: BoxFit.cover,
@@ -143,8 +144,10 @@ class RestaurantInfoCard extends StatelessWidget {
     }
 
     return FutureBuilder<Image>(
-      future:
-          mediaCache.fetchRestaurantImage(restaurant.fileName, restaurant.id),
+      future: mediaStorage.fetchRestaurantImage(
+        restaurantId: restaurant.id,
+        photoId: restaurant.imageURL,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return snapshot.data;

@@ -1,8 +1,8 @@
 import 'package:coffee_tracker/app/modules/restaurant/restaurant_controller.dart';
+import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
-import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
@@ -18,13 +18,13 @@ class RestaurantDetailsController = _RestaurantDetailsControllerBase
 abstract class _RestaurantDetailsControllerBase with Store {
   _RestaurantDetailsControllerBase() {
     final RestaurantModel r = Modular.args.data;
-    mediaCache = Modular.get();
-    mediaCache.loadCache();
+    mediaStorage = Modular.get();
+    mediaStorage.loadCache();
 
     setRestaurant(r);
   }
 
-  MediaCache mediaCache;
+  IMediaStorageRepository mediaStorage;
 
   @observable
   RestaurantModel restaurant;
@@ -61,8 +61,8 @@ abstract class _RestaurantDetailsControllerBase with Store {
 
   @action
   Future<void> delete() async {
-    mediaCache.deleteRestaurantImage(
-        id: restaurant.fileName, restaurantId: restaurant.id);
+    mediaStorage.deleteRestaurantImage(
+        photoId: restaurant.imageURL, restaurantId: restaurant.id);
 
     final IStorageRepository storage = Modular.get();
     await storage.deleteRestaurant(restaurant.id);
@@ -79,11 +79,12 @@ abstract class _RestaurantDetailsControllerBase with Store {
   }
 
   Map<String, String> get shareData {
-    final path = restaurant.fileName.isEmpty
+    final path = restaurant.imageURL.isEmpty
         ? ''
-        : '${mediaCache.cachePath.path}/${restaurant.fileName}';
+        : mediaStorage.getFullPath(restaurant.imageURL);
 
-    final name = FirebaseAuth.instance.currentUser.displayName;
+    final AuthController auth = Modular.get();
+    final name = auth.user.displayName;
 
     return {
       'text': restaurant.getRecommendationText(name),
@@ -93,16 +94,18 @@ abstract class _RestaurantDetailsControllerBase with Store {
   }
 
   Future<void> loadImage(String fileName) async {
-    if (restaurant.fileName.isEmpty) {
+    if (restaurant.imageURL.isEmpty) {
       setImage(Image.asset('images/no-image.png'));
     } else {
-      setImage(await mediaCache.fetchRestaurantImage(
-          restaurant.fileName, restaurant.id));
+      setImage(await mediaStorage.fetchRestaurantImage(
+        restaurantId: restaurant.id,
+        photoId: restaurant.imageURL,
+      ));
     }
   }
 
   Future<void> reload() async {
-    await mediaCache.loadCache();
-    await loadImage(restaurant.fileName);
+    await mediaStorage.loadCache();
+    await loadImage(restaurant.imageURL);
   }
 }

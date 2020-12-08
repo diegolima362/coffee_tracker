@@ -58,7 +58,7 @@ class _ReviewDetailsPageState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          Format.date(controller.review.reviewDate),
+                          Format.date(controller.review.visitDate),
                           style: TextStyle(fontSize: 16),
                         ),
                         Expanded(child: SizedBox()),

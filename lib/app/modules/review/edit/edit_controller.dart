@@ -117,11 +117,11 @@ abstract class _EditControllerBase with Store {
     return ReviewModel(
       id: id,
       restaurantId: restaurant.id,
-      restaurantName: restaurant.name.trim(),
+      restaurantName: restaurant.name,
       rate: rate,
       reviewDate: reviewDate,
       visitDate: date,
-      text: text.trim(),
+      text: text,
     );
   }
 

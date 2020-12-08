@@ -6,9 +6,7 @@ import 'profile_page.dart';
 
 class ProfileModule extends WidgetModule {
   @override
-  List<Bind> get binds => [
-        $ProfileController,
-      ];
+  List<Bind> get binds => [$ProfileController];
 
   @override
   List<ModularRouter> get routers => [

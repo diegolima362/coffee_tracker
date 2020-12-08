@@ -213,7 +213,11 @@ class _SignInFormState extends State<SignInForm> {
       if (store.formType == SignFormType.signUp) {
         await _verifyEmail();
       } else {
-        if (!store.isEmailVerified) await _verifyEmail();
+        if (!store.isEmailVerified)
+          await _verifyEmail();
+        else {
+          store.close();
+        }
       }
     } on PlatformException catch (e) {
       if (!kIsWeb) {

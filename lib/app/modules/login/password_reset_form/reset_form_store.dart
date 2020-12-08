@@ -61,7 +61,7 @@ abstract class _ResetFormStore with Store {
     loading = true;
 
     try {
-      await auth.resetPassword(email);
+      await auth.requestResetPassword(email);
       loading = false;
     } on PlatformException {
       rethrow;
@@ -76,8 +76,6 @@ abstract class _ResetFormStore with Store {
   }
 
   bool get isEmailVerified => auth.isEmailVerified;
-
-  Future<bool> validateCode(String code) async => await auth.validateCode(code);
 }
 
 class ResetFormErrorState = _ResetFormErrorState with _$ResetFormErrorState;

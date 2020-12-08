@@ -1,12 +1,13 @@
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
-import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
 part 'home_content_controller.g.dart';
 
+@Injectable()
 class HomeContentController = _HomeContentBase with _$HomeContentController;
 
 abstract class _HomeContentBase with Store {
@@ -26,15 +27,15 @@ abstract class _HomeContentBase with Store {
 
   _HomeContentBase() {
     _storage = Modular.get();
-    mediaCache = Modular.get();
+    mediaStorage = Modular.get();
 
-    mediaCache.loadCache();
+    mediaStorage.loadCache();
 
     _loadRestaurants();
     _loadReviews();
   }
 
-  MediaCache mediaCache;
+  IMediaStorageRepository mediaStorage;
 
   @action
   Future<void> _loadRestaurants() async {

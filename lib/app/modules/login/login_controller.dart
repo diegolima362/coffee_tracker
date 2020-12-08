@@ -19,7 +19,7 @@ abstract class _LoginControllerBase with Store {
     loading = true;
 
     try {
-      await auth.loginWithGoogle();
+      await auth.signInWithGoogle();
 
       loading = false;
 

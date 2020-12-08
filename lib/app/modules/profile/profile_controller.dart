@@ -1,8 +1,9 @@
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
-import 'package:coffee_tracker/app/shared/repositories/preferences/theme_preferences.dart';
-import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
+import 'package:coffee_tracker/app/shared/models/user_model.dart';
+import 'package:coffee_tracker/app/shared/repositories/local_storage/interfaces/preferences_storage_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
 import 'package:coffee_tracker/app/utils/connection_state.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
@@ -17,7 +18,7 @@ class ProfileController = _ProfileControllerBase with _$ProfileController;
 abstract class _ProfileControllerBase with Store {
   _ProfileControllerBase() {
     final AuthController auth = Modular.get();
-    mediaCache = Modular.get();
+    mediaStorage = Modular.get();
     darkThemePreference = Modular.get();
 
     user = auth.user;
@@ -26,12 +27,12 @@ abstract class _ProfileControllerBase with Store {
     _checkConnection();
   }
 
-  DarkThemePreference darkThemePreference;
+  ILocalStorage darkThemePreference;
 
-  MediaCache mediaCache;
+  IMediaStorageRepository mediaStorage;
 
   @observable
-  User user;
+  UserModel user;
 
   @observable
   bool isOffline;
@@ -43,13 +44,19 @@ abstract class _ProfileControllerBase with Store {
   Future<void> logout() async {
     await _clearData();
 
-    await Modular.get<AuthController>().logout();
+    await Modular.get<AuthController>().signOut();
     Modular.to.pushReplacementNamed('/login');
   }
 
   Future<void> _clearData() async {
-    mediaCache.flush();
+    mediaStorage.flushCache();
+    mediaStorage.dispose();
+
+    Modular.get<IStorageRepository>().flushCache();
+
+    await setDark(false);
     await darkThemePreference.clearData();
+    darkThemePreference.dispose();
   }
 
   @action
@@ -77,7 +84,7 @@ abstract class _ProfileControllerBase with Store {
   void _loadTheme() {
     setDark(Modular.get<AppController>().isDark);
     try {
-      darkThemePreference.getTheme().then((value) => setDark(value));
+      darkThemePreference.isDarkTheme().then((value) => setDark(value));
     } on PlatformException catch (e) {
       print(e);
     } catch (error) {

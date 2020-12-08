@@ -1,7 +1,8 @@
+import 'package:coffee_tracker/app/modules/review/components/review_info_card.dart';
 import 'package:coffee_tracker/app/modules/review/sort_by.dart';
 import 'package:coffee_tracker/app/shared/components/empty_content.dart';
-import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -74,31 +75,12 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
       );
     } else {
       return ListView.builder(
-        padding: EdgeInsets.all(8),
         itemCount: controller.reviews.length,
         itemBuilder: (context, index) {
-          final item = controller.reviews[index];
-          return GestureDetector(
-            onTap: () => controller.showDetails(review: item),
-            child: Card(
-              margin: EdgeInsets.only(bottom: 5),
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 1,
-                  horizontal: 4,
-                ),
-                title: Text('${item.restaurantName}'),
-                subtitle: Text(Format.date(item.reviewDate)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('${item.rate}'),
-                    SizedBox(width: 2),
-                    Icon(Icons.star, size: 16),
-                  ],
-                ),
-              ),
-            ),
+          final review = controller.reviews[index];
+          return ReviewInfoCard(
+            review: review,
+            onTap: () => controller.showDetails(review: review),
           );
         },
       );
@@ -117,7 +99,21 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
-      await controller.addReview();
+      try {
+        await controller.addReview();
+      } on PlatformException {
+        final snackBar = SnackBar(
+          content: Text(
+            'Sem conexão com a internet',
+            style: TextStyle(color: Theme.of(context).backgroundColor),
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Theme.of(context).accentColor,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } catch (e) {
+        print(e);
+      }
     }
   }
 }

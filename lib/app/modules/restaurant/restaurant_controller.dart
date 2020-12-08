@@ -1,7 +1,7 @@
 import 'package:coffee_tracker/app/modules/restaurant/sort_by.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
-import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
 import 'package:coffee_tracker/app/utils/connection_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -19,11 +19,11 @@ class RestaurantController = _RestaurantControllerBase
 abstract class _RestaurantControllerBase with Store {
   _RestaurantControllerBase() {
     storage = Modular.get();
-    mediaCache = Modular.get();
+    mediaStorage = Modular.get();
     loadData();
   }
 
-  MediaCache mediaCache;
+  IMediaStorageRepository mediaStorage;
   IStorageRepository storage;
 
   RestaurantSearch searchDelegate;
@@ -66,7 +66,7 @@ abstract class _RestaurantControllerBase with Store {
     restaurants
         .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
-    await mediaCache.loadCache();
+    await mediaStorage.loadCache();
 
     isLoading = false;
   }

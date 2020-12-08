@@ -105,7 +105,7 @@ abstract class _FormStore with Store {
 
   Future<void> close() async {
     print('> close email sign in form');
-    await Modular.to.pushReplacementNamed('/login');
+    await Modular.to.pushReplacementNamed('/');
   }
 
   @action
@@ -114,7 +114,7 @@ abstract class _FormStore with Store {
 
     try {
       if (this.formType == SignFormType.signIn) {
-        await _auth.loginWithEmail(
+        await _auth.signInWithEmailPassword(
           email: email.trim(),
           password: password.trim(),
         );
@@ -143,9 +143,6 @@ abstract class _FormStore with Store {
   bool get isEmailVerified => _auth.isEmailVerified;
 
   bool get loggedIn => _auth.status == AuthStatus.loggedOn;
-
-  Future<bool> validateCode(String code) async =>
-      await _auth.validateCode(code);
 
   void alertHandled() => _auth.alertHandled();
 

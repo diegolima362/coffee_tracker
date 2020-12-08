@@ -8,9 +8,7 @@ import 'login_page.dart';
 
 class LoginModule extends ChildModule {
   @override
-  List<Bind> get binds => [
-        $LoginController,
-      ];
+  List<Bind> get binds => [$LoginController];
 
   @override
   List<ModularRouter> get routers => [

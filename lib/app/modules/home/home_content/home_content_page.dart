@@ -1,6 +1,6 @@
 import 'package:coffee_tracker/app/modules/restaurant/components/restaurant_info_card.dart';
+import 'package:coffee_tracker/app/modules/review/components/review_info_card.dart';
 import 'package:coffee_tracker/app/shared/components/empty_content.dart';
-import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -83,7 +83,7 @@ class _HomeContentPageState
             itemBuilder: (context, index) {
               final restaurant = controller.restaurants[index];
               return RestaurantInfoCard(
-                mediaCache: controller.mediaCache,
+                mediaStorage: controller.mediaStorage,
                 restaurant: restaurant,
                 height: (portrait ? height : width) / 4,
                 width: (portrait ? width : height) / 3,
@@ -113,23 +113,9 @@ class _HomeContentPageState
             itemCount: _length,
             itemBuilder: (context, index) {
               final review = reviews[index];
-              return GestureDetector(
+              return ReviewInfoCard(
+                review: review,
                 onTap: () => controller.showReviewsDetails(review),
-                child: Card(
-                  child: ListTile(
-                    title: Text(review.restaurantName),
-                    subtitle: Text(
-                      Format.date(review.reviewDate),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(review.rate.toString()),
-                        Icon(Icons.star, size: 12),
-                      ],
-                    ),
-                  ),
-                ),
               );
             },
           );

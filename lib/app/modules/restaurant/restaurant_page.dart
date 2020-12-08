@@ -92,7 +92,7 @@ class _RestaurantPageState
           final restaurant = controller.restaurants[index];
           return RestaurantInfoCard(
             restaurant: restaurant,
-            mediaCache: controller.mediaCache,
+            mediaStorage: controller.mediaStorage,
             expanded: true,
             height: (portrait ? height : width) / 6,
             onTap: () => controller.showDetails(restaurant: restaurant),

@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:coffee_tracker/app/modules/restaurant/restaurant_details/restaurant_details_controller.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
+import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
-import 'package:coffee_tracker/app/shared/repositories/storage/media_cache.dart';
 import 'package:coffee_tracker/app/utils/id_generator.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -19,16 +19,16 @@ class EditController = _EditControllerBase with _$EditController;
 abstract class _EditControllerBase with Store {
   _EditControllerBase() {
     final RestaurantModel r = Modular.args.data;
-    mediaCache = Modular.get();
+    mediaStorage = Modular.get();
 
-    mediaCache.loadCache();
+    mediaStorage.loadCache();
 
     setRestaurant(r);
 
-    setFileName(r?.fileName?.isNotEmpty ?? false ? r.fileName : '');
+    setImagePath(r?.imageURL?.isNotEmpty ?? false ? r.imageURL : '');
 
     if (r != null) {
-      loadImage(r.fileName);
+      loadImage(r.imageURL);
       setName(r.name);
       setCity(r.city);
       setAddress(r.address);
@@ -39,11 +39,11 @@ abstract class _EditControllerBase with Store {
     } else {
       _registerDate = DateTime.now();
       _id = IdGenerator.documentIdFromCurrentDate();
-      setFileName('');
+      setImagePath('');
     }
   }
 
-  MediaCache mediaCache;
+  IMediaStorageRepository mediaStorage;
 
   String _id;
   DateTime _registerDate;
@@ -63,10 +63,10 @@ abstract class _EditControllerBase with Store {
   Image savedImage;
 
   @observable
-  String fileName;
+  String imagePath;
 
   @computed
-  bool get hasImage => imageFile != null || fileName.isNotEmpty;
+  bool get hasImage => imageFile != null || imagePath.isNotEmpty;
 
   @observable
   File imageFile;
@@ -99,7 +99,7 @@ abstract class _EditControllerBase with Store {
   void setAddress(String value) => address = value;
 
   @action
-  void setFileName(String value) => fileName = value;
+  void setImagePath(String value) => imagePath = value;
 
   @action
   void setCity(String value) => city = value;
@@ -118,17 +118,17 @@ abstract class _EditControllerBase with Store {
   @action
   void setImageFile(File value) {
     changedImage = true;
-    if (fileName.isNotEmpty && value == null) {
+    if (imagePath.isNotEmpty && value == null) {
       imageFile = value;
       deletedImage = true;
       setRestaurantImage = false;
       setImage(Image.asset('images/no-image.png'));
-      setFileName('');
+      setImagePath('');
     } else {
       setRestaurantImage = true;
       imageFile = value;
       setImage(Image.file(value));
-      setFileName(_id + '.jpg');
+      setImagePath(_id);
     }
   }
 
@@ -137,24 +137,27 @@ abstract class _EditControllerBase with Store {
     return RestaurantModel(
       id: _id,
       registerDate: _registerDate,
-      name: name.trim(),
-      city: city.trim(),
-      address: address.trim(),
-      state: state.trim(),
+      name: name,
+      city: city,
+      address: address,
+      state: state,
       favorite: restaurant?.favorite ?? false,
-      fileName: fileName,
-      commentary: commentary.trim(),
+      imageURL: imagePath,
+      commentary: commentary,
     );
   }
 
-  Future<void> loadImage(String url) async {
-    if (url.isEmpty) {
-      setFileName('');
+  Future<void> loadImage(String imageURL) async {
+    if (imageURL.isEmpty) {
+      setImagePath('');
       setImage(Image.asset('images/no-image.png'));
     } else {
-      await mediaCache.loadCache();
-      setImage(await mediaCache.fetchRestaurantImage(url, restaurant.id));
-      setFileName(url);
+      await mediaStorage.loadCache();
+      setImage(await mediaStorage.fetchRestaurantImage(
+        photoId: imageURL,
+        restaurantId: restaurant.id,
+      ));
+      setImagePath(imageURL);
     }
   }
 
@@ -165,40 +168,36 @@ abstract class _EditControllerBase with Store {
     final r = _restaurantFromState();
 
     if (deletedImage) {
-      mediaCache.deleteRestaurantImage(
-        id: fileName,
+      mediaStorage.deleteRestaurantImage(
+        photoId: imagePath,
         restaurantId: _id,
       );
-      r.fileName = '';
+      r.imageURL = '';
     } else if (setRestaurantImage) {
-      mediaCache.addRestaurantImage(
+      mediaStorage.persistRestaurantImage(
         restaurantId: _id,
-        id: _id + '.jpg',
         file: imageFile,
       );
-      r.fileName = _id + '.jpg';
-      mediaCache.synchronize();
+      r.imageURL = _id;
     }
 
     if (restaurant != null) {
       final RestaurantDetailsController controller = Modular.get();
 
-      controller.restaurant.name = r.name.trim();
-      controller.restaurant.fileName = r.fileName.trim();
-      controller.restaurant.city = r.city.trim();
-      controller.restaurant.state = r.state.trim();
-      controller.restaurant.address = r.address.trim();
-      controller.restaurant.commentary = r.commentary.trim();
+      controller.restaurant.name = r.name;
+      controller.restaurant.imageURL = r.imageURL;
+      controller.restaurant.city = r.city;
+      controller.restaurant.state = r.state;
+      controller.restaurant.address = r.address;
+      controller.restaurant.commentary = r.commentary;
 
       await storage.updateRestaurant(r);
-      controller.reload();
+      await controller.reload();
     } else {
       await storage.persistRestaurant(r);
       final RestaurantController controller = Modular.get();
       await controller.loadData();
     }
-
-    print(r.fileName);
 
     Modular.navigator.pop();
   }
