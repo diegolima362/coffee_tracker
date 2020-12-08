@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:coffee_tracker/app/shared/models/user_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -10,6 +10,7 @@ part 'auth_controller.g.dart';
 
 enum AuthStatus { waiting, loggedOn, loggedOut }
 
+@Injectable()
 class AuthController = _AuthControllerBase with _$AuthController;
 
 abstract class _AuthControllerBase with Store {
@@ -20,9 +21,7 @@ abstract class _AuthControllerBase with Store {
         ? AuthStatus.loggedOut
         : AuthStatus.loggedOn;
 
-    print('> user : ${_authRepository.currentUser}');
-
-    _authRepository.getUser().listen((u) {
+    _authRepository.onAuthStateChanged.listen((u) {
       setUser(u);
     });
   }
@@ -33,25 +32,26 @@ abstract class _AuthControllerBase with Store {
   AuthStatus status;
 
   @observable
-  User user;
+  UserModel user;
 
-  bool get isEmailVerified => _authRepository.emailVerified();
+  bool get isEmailVerified => _authRepository.currentUser.emailVerified;
 
-  Future<bool> validateCode(String code) async =>
-      await _authRepository.validateCode(code);
+  Stream<UserModel> get onAuthStateChanged {
+    return _authRepository.onAuthStateChanged;
+  }
 
   @action
-  void setUser(User value) => user = value;
+  void setUser(UserModel value) => user = value;
 
   @action
   void alertHandled() => status = AuthStatus.loggedOut;
 
   @action
-  Future loginWithGoogle() async {
+  Future signInWithGoogle() async {
     status = AuthStatus.waiting;
     try {
-      user = await _authRepository.getGoogleLogin();
-      if (user?.uid != null)
+      user = await _authRepository.signInWithGoogle();
+      if (user?.id != null)
         status = AuthStatus.loggedOn;
       else
         status = AuthStatus.loggedOut;
@@ -65,23 +65,23 @@ abstract class _AuthControllerBase with Store {
   }
 
   @action
-  Future loginWithEmail({
+  Future signInWithEmailPassword({
     @required String email,
     @required String password,
   }) async {
     status = AuthStatus.waiting;
 
     try {
-      user = await _authRepository.getEmailPasswordLogin(
+      user = await _authRepository.signInWithEmailPassword(
         email: email,
         password: password,
       );
 
       if (user.emailVerified) {
         status = AuthStatus.loggedOn;
+        setUser(user);
       } else {
-        // user.sendEmailVerification();
-        // status = AuthStatus.loggedOut;
+        status = AuthStatus.loggedOut;
       }
     } on PlatformException {
       status = AuthStatus.loggedOut;
@@ -96,7 +96,7 @@ abstract class _AuthControllerBase with Store {
   }) async {
     status = AuthStatus.waiting;
     try {
-      user = await _authRepository.getEmailPasswordSignUp(
+      await _authRepository.signUpWithEmailPassword(
         email: email,
         password: password,
       );
@@ -109,10 +109,11 @@ abstract class _AuthControllerBase with Store {
   }
 
   @action
-  Future resetPassword(String email) async {
+  Future requestResetPassword(String email) async {
     status = AuthStatus.waiting;
     try {
-      await _authRepository.resetPassword(email);
+      await _authRepository.requestResetPassword(email);
+      setUser(null);
       status = AuthStatus.loggedOut;
     } on PlatformException {
       status = AuthStatus.loggedOut;
@@ -121,18 +122,16 @@ abstract class _AuthControllerBase with Store {
   }
 
   @action
-  Future<void> logout() async {
+  Future<void> signOut() async {
     try {
       status = AuthStatus.waiting;
-      await _authRepository.getLogout();
+      await _authRepository.signOut();
       status = AuthStatus.loggedOut;
     } on PlatformException {
       status = AuthStatus.loggedOut;
       rethrow;
     }
   }
-
-  Stream<User> get onAuthStateChanged => _authRepository.onAuthStateChanged;
 }
 
 class VerifyEmailAlert implements Exception {}

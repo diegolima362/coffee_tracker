@@ -7,15 +7,17 @@ abstract class IStorageRepository implements Disposable {
 
   Future<List<ReviewModel>> getAllReviews();
 
-  Future<void> persistReview(ReviewModel review);
-
-  Future<void> deleteReview(String id);
-
-  Future<void> deleteRestaurant(String id);
-
   Future<void> persistRestaurant(RestaurantModel restaurant);
+
+  Future<void> persistReview(ReviewModel review);
 
   Future<void> updateRestaurant(RestaurantModel restaurant);
 
   Future<void> updateReview(ReviewModel review);
+
+  Future<void> deleteRestaurant(String id);
+
+  Future<void> deleteReview(String id);
+
+  void flushCache();
 }

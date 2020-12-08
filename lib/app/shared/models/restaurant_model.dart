@@ -10,7 +10,7 @@ class RestaurantModel {
   String city;
   String state;
   bool favorite;
-  String fileName;
+  String imageURL;
   final DateTime registerDate;
 
   List<ReviewModel> _reviews;
@@ -23,7 +23,7 @@ class RestaurantModel {
     @required this.state,
     this.address = '',
     this.favorite = false,
-    this.fileName = '',
+    this.imageURL = '',
     this.commentary = '',
   }) {
     _reviews = List<ReviewModel>();
@@ -66,7 +66,7 @@ class RestaurantModel {
       address: map['address'] ?? '',
       city: map['city'] ?? '',
       state: map['state'] ?? '',
-      fileName: map['fileName'] ?? '',
+      imageURL: map['imageURL'] ?? '',
       favorite: map['favorite'] ?? false,
       commentary: map['commentary'] ?? '',
       registerDate: DateTime.fromMillisecondsSinceEpoch(
@@ -80,7 +80,7 @@ class RestaurantModel {
         'address': address ?? '',
         'city': city ?? '',
         'state': state ?? '',
-        'fileName': fileName ?? '',
+        'imageURL': imageURL ?? '',
         'favorite': favorite ?? false,
         'commentary': commentary ?? '',
         'registerDate': registerDate?.millisecondsSinceEpoch ??
@@ -104,7 +104,7 @@ class RestaurantModel {
           city == other.city &&
           state == other.state &&
           favorite == other.favorite &&
-          fileName == other.fileName &&
+          imageURL == other.imageURL &&
           registerDate == other.registerDate &&
           _reviews == other._reviews;
 
@@ -117,7 +117,7 @@ class RestaurantModel {
       city.hashCode ^
       state.hashCode ^
       favorite.hashCode ^
-      fileName.hashCode ^
+      imageURL.hashCode ^
       registerDate.hashCode ^
       _reviews.hashCode;
 }

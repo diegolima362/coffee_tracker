@@ -3,6 +3,21 @@ import 'package:flutter/material.dart';
 class CustomThemes {
   CustomThemes._();
 
+  static Map<int, Color> _getSwash(Color accentColor) {
+    return {
+      50: accentColor.withOpacity(.1),
+      100: accentColor.withOpacity(.2),
+      200: accentColor.withOpacity(.3),
+      300: accentColor.withOpacity(.4),
+      400: accentColor.withOpacity(.5),
+      500: accentColor.withOpacity(.6),
+      600: accentColor.withOpacity(.7),
+      700: accentColor.withOpacity(.8),
+      800: accentColor.withOpacity(.9),
+      900: accentColor.withOpacity(1),
+    };
+  }
+
   static ThemeData get light {
     final white = Color(0xFFFEFEFE);
 
@@ -18,8 +33,10 @@ class CustomThemes {
     final iconColor = Color(0xFF1D3557);
     final dividerColor = Color(0xFFDDDDDD);
     final anotherWhite = Color(0xFFAAAAAA);
+    final swash = MaterialColor(accent.value, _getSwash(accent));
 
     return ThemeData(
+      primarySwatch: swash,
       brightness: Brightness.light,
       accentColorBrightness: Brightness.light,
       primaryColorBrightness: Brightness.light,
@@ -97,8 +114,10 @@ class CustomThemes {
     final iconColor = Color(0xFFE43F5A);
     final dividerColor = Color(0xFF121212);
     final anotherWhite = Color(0xFFAAAAAA);
+    final swash = MaterialColor(accent.value, _getSwash(accent));
 
     return ThemeData(
+      primarySwatch: swash,
       brightness: Brightness.dark,
       accentColorBrightness: Brightness.dark,
       primaryColorBrightness: Brightness.dark,

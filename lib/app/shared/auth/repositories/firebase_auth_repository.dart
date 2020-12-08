@@ -1,13 +1,18 @@
+import 'package:coffee_tracker/app/shared/models/user_model.dart';
 import 'package:coffee_tracker/app/utils/connection_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'interfaces/auth_repository_interface.dart';
 
-class AuthRepository implements IAuthRepository {
-  AuthRepository() {
+part 'firebase_auth_repository.g.dart';
+
+@Injectable()
+class FirebaseAuthRepository implements IAuthRepository {
+  FirebaseAuthRepository() {
     _googleSignIn = GoogleSignIn();
     _auth = FirebaseAuth.instance;
   }
@@ -16,12 +21,15 @@ class AuthRepository implements IAuthRepository {
   FirebaseAuth _auth;
 
   @override
-  Future<String> getToken() async {
-    return await _auth.currentUser.getIdToken();
+  UserModel get currentUser => _userFromFirebase(_auth.currentUser);
+
+  @override
+  Stream<UserModel> get onAuthStateChanged {
+    return _auth.authStateChanges().map(_userFromFirebase);
   }
 
   @override
-  Future<User> getGoogleLogin() async {
+  Future<UserModel> signInWithGoogle() async {
     User user;
 
     try {
@@ -45,41 +53,28 @@ class AuthRepository implements IAuthRepository {
       rethrow;
     }
 
-    return user;
+    return _userFromFirebase(user);
   }
 
   @override
-  Future<void> getLogout() async {
-    try {
-      await _googleSignIn.signOut();
-      await _auth.signOut();
-    } on PlatformException {
-      rethrow;
-    }
-  }
-
-  @override
-  Stream<User> getUser() {
-    return _auth.authStateChanges();
-  }
-
-  @override
-  User get currentUser => _auth.currentUser;
-
-  @override
-  Future<User> getEmailPasswordLogin({String email, String password}) async {
-    UserCredential authResult;
+  Future<UserModel> signInWithEmailPassword({
+    String email,
+    String password,
+  }) async {
+    User user;
 
     try {
       await _checkConnection();
 
-      authResult = await _auth.signInWithEmailAndPassword(
+      UserCredential authResult = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (!authResult.user.emailVerified) {
-        await authResult.user.sendEmailVerification();
+      user = authResult?.user;
+
+      if (user != null && !user.emailVerified) {
+        user.sendEmailVerification();
       }
     } on PlatformException {
       rethrow;
@@ -92,11 +87,11 @@ class AuthRepository implements IAuthRepository {
       rethrow;
     }
 
-    return authResult.user;
+    return _userFromFirebase(user);
   }
 
   @override
-  Future<User> getEmailPasswordSignUp({String email, String password}) async {
+  Future<void> signUpWithEmailPassword({String email, String password}) async {
     UserCredential authResult;
     try {
       await _checkConnection();
@@ -106,7 +101,7 @@ class AuthRepository implements IAuthRepository {
         password: password,
       );
 
-      await authResult.user.sendEmailVerification();
+      authResult.user.sendEmailVerification();
     } on PlatformException {
       rethrow;
     } on Exception catch (e) {
@@ -117,12 +112,10 @@ class AuthRepository implements IAuthRepository {
     } catch (e) {
       rethrow;
     }
-
-    return authResult.user;
   }
 
   @override
-  Future<void> resetPassword(String email) async {
+  Future<void> requestResetPassword(String email) async {
     try {
       await _checkConnection();
 
@@ -142,20 +135,18 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-  Future<void> validateEmail(String code) async {
+  @override
+  Future<void> signOut() async {
     try {
-      await _checkConnection();
-
-      await _auth.checkActionCode(code);
-      await _auth.applyActionCode(code);
-
-      _auth.currentUser.reload();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-action-code') {
-        print('The code is invalid.');
-      }
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+    } on PlatformException {
+      rethrow;
     }
   }
+
+  @override
+  void dispose() {}
 
   Future _checkConnection() async {
     if (!kIsWeb) {
@@ -172,30 +163,14 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-  @override
-  bool emailVerified() => _auth.currentUser.emailVerified;
+  UserModel _userFromFirebase(User user) {
+    if (user == null) return null;
 
-  @override
-  Future<bool> validateCode(String code) async {
-    await _checkConnection();
-
-    try {
-      await _auth.checkActionCode(code);
-      await _auth.applyActionCode(code);
-
-      _auth.currentUser.reload();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-action-code') {
-        print('The code is invalid.');
-      }
-    }
-
-    return true;
+    return UserModel(
+      id: user.uid,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      emailVerified: user.emailVerified,
+    );
   }
-
-  @override
-  void dispose() {}
-
-  @override
-  Stream<User> get onAuthStateChanged => _auth.authStateChanges();
 }

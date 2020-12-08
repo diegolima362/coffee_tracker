@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:coffee_tracker/app/shared/models/user_model.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'interfaces/storage_repository_interface.dart';
@@ -13,37 +14,20 @@ class FireStoreStorageRepository implements IStorageRepository {
   List<RestaurantModel> _restaurants;
   List<ReviewModel> _reviews;
 
-  @override
-  Future<void> deleteRestaurant(String id) {
-    final uid = FirebaseAuth.instance.currentUser.uid;
-    final ref = FirebaseFirestore.instance.doc('users/$uid/restaurants/$id');
-    return ref.delete().then((value) {
-      print('> restaurant deleted');
-      deleteReviews(id);
-    }).catchError((error) => print('> failed to delete restaurant: $error'));
+  FireStoreStorageRepository() {
+    _user = Modular.get<AuthController>().user;
+
+    Modular.get<AuthController>().onAuthStateChanged.listen((u) => _user = u);
   }
 
-  Future<void> deleteReviews(String restaurantId) async {
-    _reviews.forEach((r) async {
-      if (r.restaurantId == restaurantId) await deleteReview(r.id);
-    });
-  }
-
-  @override
-  Future<void> deleteReview(String id) {
-    final uid = FirebaseAuth.instance.currentUser.uid;
-    final ref = FirebaseFirestore.instance.doc('users/$uid/reviews/$id');
-    return ref
-        .delete()
-        .then((value) => print('> review deleted'))
-        .catchError((error) => print('> failed to delete review: $error'));
-  }
+  UserModel _user;
 
   @override
   Future<List<RestaurantModel>> getAllRestaurants() async {
-    if (_restaurants == null) _restaurants = List<RestaurantModel>();
+    if (_restaurants == null || _restaurants.isEmpty)
+      _restaurants = List<RestaurantModel>();
 
-    final uid = FirebaseAuth.instance.currentUser.uid;
+    final uid = _user.id;
     final data = await FirebaseFirestore.instance
         .collection('users/$uid/restaurants')
         .get();
@@ -67,7 +51,7 @@ class FireStoreStorageRepository implements IStorageRepository {
   Future<List<ReviewModel>> getAllReviews() async {
     if (_reviews == null) _reviews = List<ReviewModel>();
 
-    final uid = FirebaseAuth.instance.currentUser.uid;
+    final uid = _user.id;
     final data =
         await FirebaseFirestore.instance.collection('users/$uid/reviews').get();
 
@@ -77,8 +61,31 @@ class FireStoreStorageRepository implements IStorageRepository {
   }
 
   @override
+  Future<void> persistRestaurant(RestaurantModel restaurant) async {
+    final uid = _user.id;
+    final ref = FirebaseFirestore.instance
+        .doc('users/$uid/restaurants/${restaurant.id}');
+
+    return ref.set(restaurant.toMap()).then((value) {
+      print('> restaurant synced');
+      print(restaurant);
+    }).catchError((error) => print('> failed to add restaurant: $error'));
+  }
+
+  @override
+  Future<void> persistReview(ReviewModel review) {
+    final uid = _user.id;
+    final ref =
+        FirebaseFirestore.instance.doc('users/$uid/reviews/${review.id}');
+    return ref.set(review.toMap()).then((value) {
+      print('> review synced');
+      print(review);
+    }).catchError((error) => print('> failed to add review: $error'));
+  }
+
+  @override
   Future<void> updateRestaurant(RestaurantModel restaurant) async {
-    final uid = FirebaseAuth.instance.currentUser.uid;
+    final uid = _user.id;
     final ref = FirebaseFirestore.instance
         .doc('users/$uid/restaurants/${restaurant.id}');
 
@@ -100,7 +107,7 @@ class FireStoreStorageRepository implements IStorageRepository {
       if (temp.commentary != restaurant.commentary)
         'commentary': restaurant.commentary,
       if (temp.favorite != restaurant.favorite) 'favorite': restaurant.favorite,
-      if (temp.fileName != restaurant.fileName) 'fileName': restaurant.fileName,
+      if (temp.imageURL != restaurant.imageURL) 'imageURL': restaurant.imageURL,
       if (temp.name != restaurant.name) 'name': restaurant.name,
       if (temp.state != restaurant.state) 'state': restaurant.state,
     }).then((value) {
@@ -111,20 +118,19 @@ class FireStoreStorageRepository implements IStorageRepository {
 
   @override
   Future<void> updateReview(ReviewModel review) async {
-    final uid = FirebaseAuth.instance.currentUser.uid;
+    final uid = _user.id;
     final ref =
         FirebaseFirestore.instance.doc('users/$uid/reviews/${review.id}');
 
     final map = (await ref.get()).data();
     ReviewModel temp = ReviewModel.fromMap(map);
 
-    print(temp);
-
     ref.update({
       if (temp.rate != review.rate) 'rate': review.rate,
       if (temp.restaurantName != review.restaurantName)
         'restaurantName': review.restaurantName,
-      if (temp.visitDate != review.visitDate) 'visitDate': review.visitDate,
+      if (temp.visitDate != review.visitDate)
+        'visitDate': review.visitDate.millisecondsSinceEpoch,
       if (temp.text != review.text) 'text': review.text
     }).then((value) {
       print('> review updated');
@@ -133,28 +139,39 @@ class FireStoreStorageRepository implements IStorageRepository {
   }
 
   @override
-  Future<void> persistRestaurant(RestaurantModel restaurant) async {
-    final uid = FirebaseAuth.instance.currentUser.uid;
-    final ref = FirebaseFirestore.instance
-        .doc('users/$uid/restaurants/${restaurant.id}');
-
-    return ref.set(restaurant.toMap()).then((value) {
-      print('> restaurant synced');
-      print(restaurant);
-    }).catchError((error) => print('> failed to add restaurant: $error'));
+  Future<void> deleteRestaurant(String id) {
+    final uid = _user.id;
+    final ref = FirebaseFirestore.instance.doc('users/$uid/restaurants/$id');
+    return ref.delete().then((value) {
+      _deleteReviews(id);
+      print('> restaurant deleted');
+    }).catchError((error) => print('> failed to delete restaurant: $error'));
   }
 
   @override
-  Future<void> persistReview(ReviewModel review) {
-    final uid = FirebaseAuth.instance.currentUser.uid;
-    final ref =
-        FirebaseFirestore.instance.doc('users/$uid/reviews/${review.id}');
-    return ref.set(review.toMap()).then((value) {
-      print('> review synced');
-      print(review);
-    }).catchError((error) => print('> failed to add review: $error'));
+  Future<void> deleteReview(String id) {
+    final uid = _user.id;
+    final ref = FirebaseFirestore.instance.doc('users/$uid/reviews/$id');
+    return ref
+        .delete()
+        .then((value) => print('> review deleted'))
+        .catchError((error) => print('> failed to delete review: $error'));
+  }
+
+  Future<void> _deleteReviews(String restaurantId) async {
+    _reviews.forEach((r) async {
+      if (r.restaurantId == restaurantId) await deleteReview(r.id);
+    });
   }
 
   @override
-  void dispose() {}
+  void dispose() {
+    flushCache();
+  }
+
+  @override
+  void flushCache() {
+    _restaurants?.clear();
+    _reviews?.clear();
+  }
 }

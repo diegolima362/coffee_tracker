@@ -32,8 +32,10 @@ class ReviewModel {
   }
 
   factory ReviewModel.fromMap(Map<String, dynamic> map) {
-    final _reviewDate = DateTime.fromMillisecondsSinceEpoch(map['reviewDate']);
-    final _visitDate = DateTime.fromMillisecondsSinceEpoch(map['visitDate']);
+    final _reviewDate = DateTime.fromMillisecondsSinceEpoch(
+        map['reviewDate'] ?? DateTime.now().millisecondsSinceEpoch);
+    final _visitDate = DateTime.fromMillisecondsSinceEpoch(
+        map['visitDate'] ?? DateTime.now().millisecondsSinceEpoch);
 
     return ReviewModel(
       id: map['id'],

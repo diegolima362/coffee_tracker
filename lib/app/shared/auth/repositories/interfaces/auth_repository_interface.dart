@@ -1,26 +1,18 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:coffee_tracker/app/shared/models/user_model.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 abstract class IAuthRepository implements Disposable {
-  Future<User> getGoogleLogin();
+  UserModel get currentUser;
 
-  Stream<User> get onAuthStateChanged;
+  Stream<UserModel> get onAuthStateChanged;
 
-  Future<User> getEmailPasswordLogin({String email, String password});
+  Future<UserModel> signInWithGoogle();
 
-  Future<User> getEmailPasswordSignUp({String email, String password});
+  Future<UserModel> signInWithEmailPassword({String email, String password});
 
-  Future<String> getToken();
+  Future<void> signUpWithEmailPassword({String email, String password});
 
-  Future<void> getLogout();
+  Future<void> requestResetPassword(String email);
 
-  Stream<User> getUser();
-
-  Future<void> resetPassword(String email);
-
-  bool emailVerified();
-
-  User get currentUser;
-
-  Future<bool> validateCode(String code);
+  Future<void> signOut();
 }
