@@ -1,4 +1,4 @@
-import 'package:coffee_tracker/app/shared/repositories/preferences/theme_preferences.dart';
+import 'package:coffee_tracker/app/shared/repositories/local_storage/interfaces/preferences_storage_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
@@ -14,7 +14,7 @@ abstract class _AppControllerBase with Store {
     loadTheme();
   }
 
-  DarkThemePreference darkThemePreference;
+  ILocalStorage darkThemePreference;
 
   @observable
   ThemeData themeType;
@@ -27,7 +27,7 @@ abstract class _AppControllerBase with Store {
 
   @action
   Future<void> loadTheme() async {
-    final prefs = await darkThemePreference.getTheme();
+    final prefs = await darkThemePreference.isDarkTheme();
 
     if (prefs) {
       themeType = ThemeData.dark();

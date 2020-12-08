@@ -41,6 +41,6 @@ class Format {
             ? i[0].toUpperCase() + i.substring(1) + ' '
             : i + ' '));
 
-    return s.toString();
+    return s.toString().trim();
   }
 }
