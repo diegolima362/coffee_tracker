@@ -48,18 +48,18 @@ mixin _$EditController on _EditControllerBase, Store {
     });
   }
 
-  final _$fileNameAtom = Atom(name: '_EditControllerBase.fileName');
+  final _$imagePathAtom = Atom(name: '_EditControllerBase.imagePath');
 
   @override
-  String get fileName {
-    _$fileNameAtom.reportRead();
-    return super.fileName;
+  String get imagePath {
+    _$imagePathAtom.reportRead();
+    return super.imagePath;
   }
 
   @override
-  set fileName(String value) {
-    _$fileNameAtom.reportWrite(value, super.fileName, () {
-      super.fileName = value;
+  set imagePath(String value) {
+    _$imagePathAtom.reportWrite(value, super.imagePath, () {
+      super.imagePath = value;
     });
   }
 
@@ -219,11 +219,11 @@ mixin _$EditController on _EditControllerBase, Store {
   }
 
   @override
-  void setFileName(String value) {
+  void setImagePath(String value) {
     final _$actionInfo = _$_EditControllerBaseActionController.startAction(
-        name: '_EditControllerBase.setFileName');
+        name: '_EditControllerBase.setImagePath');
     try {
-      return super.setFileName(value);
+      return super.setImagePath(value);
     } finally {
       _$_EditControllerBaseActionController.endAction(_$actionInfo);
     }
@@ -288,7 +288,7 @@ mixin _$EditController on _EditControllerBase, Store {
   String toString() {
     return '''
 savedImage: ${savedImage},
-fileName: ${fileName},
+imagePath: ${imagePath},
 imageFile: ${imageFile},
 restaurant: ${restaurant},
 name: ${name},

@@ -3,6 +3,16 @@
 part of 'auth_controller.dart';
 
 // **************************************************************************
+// InjectionGenerator
+// **************************************************************************
+
+final $AuthController = BindInject(
+  (i) => AuthController(),
+  singleton: true,
+  lazy: true,
+);
+
+// **************************************************************************
 // StoreGenerator
 // **************************************************************************
 
@@ -27,34 +37,34 @@ mixin _$AuthController on _AuthControllerBase, Store {
   final _$userAtom = Atom(name: '_AuthControllerBase.user');
 
   @override
-  User get user {
+  UserModel get user {
     _$userAtom.reportRead();
     return super.user;
   }
 
   @override
-  set user(User value) {
+  set user(UserModel value) {
     _$userAtom.reportWrite(value, super.user, () {
       super.user = value;
     });
   }
 
-  final _$loginWithGoogleAsyncAction =
-      AsyncAction('_AuthControllerBase.loginWithGoogle');
+  final _$signInWithGoogleAsyncAction =
+      AsyncAction('_AuthControllerBase.signInWithGoogle');
 
   @override
-  Future<dynamic> loginWithGoogle() {
-    return _$loginWithGoogleAsyncAction.run(() => super.loginWithGoogle());
+  Future<dynamic> signInWithGoogle() {
+    return _$signInWithGoogleAsyncAction.run(() => super.signInWithGoogle());
   }
 
-  final _$loginWithEmailAsyncAction =
-      AsyncAction('_AuthControllerBase.loginWithEmail');
+  final _$signInWithEmailPasswordAsyncAction =
+      AsyncAction('_AuthControllerBase.signInWithEmailPassword');
 
   @override
-  Future<dynamic> loginWithEmail(
+  Future<dynamic> signInWithEmailPassword(
       {@required String email, @required String password}) {
-    return _$loginWithEmailAsyncAction
-        .run(() => super.loginWithEmail(email: email, password: password));
+    return _$signInWithEmailPasswordAsyncAction.run(
+        () => super.signInWithEmailPassword(email: email, password: password));
   }
 
   final _$signUpWithEmailAsyncAction =
@@ -67,26 +77,27 @@ mixin _$AuthController on _AuthControllerBase, Store {
         .run(() => super.signUpWithEmail(email: email, password: password));
   }
 
-  final _$resetPasswordAsyncAction =
-      AsyncAction('_AuthControllerBase.resetPassword');
+  final _$requestResetPasswordAsyncAction =
+      AsyncAction('_AuthControllerBase.requestResetPassword');
 
   @override
-  Future<dynamic> resetPassword(String email) {
-    return _$resetPasswordAsyncAction.run(() => super.resetPassword(email));
+  Future<dynamic> requestResetPassword(String email) {
+    return _$requestResetPasswordAsyncAction
+        .run(() => super.requestResetPassword(email));
   }
 
-  final _$logoutAsyncAction = AsyncAction('_AuthControllerBase.logout');
+  final _$signOutAsyncAction = AsyncAction('_AuthControllerBase.signOut');
 
   @override
-  Future<void> logout() {
-    return _$logoutAsyncAction.run(() => super.logout());
+  Future<void> signOut() {
+    return _$signOutAsyncAction.run(() => super.signOut());
   }
 
   final _$_AuthControllerBaseActionController =
       ActionController(name: '_AuthControllerBase');
 
   @override
-  void setUser(User value) {
+  void setUser(UserModel value) {
     final _$actionInfo = _$_AuthControllerBaseActionController.startAction(
         name: '_AuthControllerBase.setUser');
     try {
