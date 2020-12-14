@@ -1,6 +1,14 @@
 #gen
 *.g.dart
 
+.idea/
+.metadata
+
+/android/app/google-services.json
+/android/app/debug
+/android/app/release
+/android/app/profile
+
 # Slidy History Files
 .slidy/
 
@@ -52,3 +60,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.gradle/6.1.1/vcsMetadata-1/
