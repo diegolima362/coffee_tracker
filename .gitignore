@@ -4,6 +4,11 @@
 .idea/
 .metadata
 
+.vscode/
+
+.firebase/
+.firebaserc
+
 /android/app/google-services.json
 /android/app/debug
 /android/app/release
@@ -23,13 +28,14 @@
 .history
 .svn/
 
-/android/app/google-services.json
 
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
-.idea/
+
+linux/
+windows/
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
@@ -57,7 +63,11 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
 .gradle/6.1.1/vcsMetadata-1/
+
+# mobx
+
+*.g.dart
+
+
+pubspec.lock
