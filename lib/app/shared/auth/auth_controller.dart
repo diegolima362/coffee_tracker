@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:coffee_tracker/app/shared/models/user_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +17,8 @@ class AuthController = _AuthControllerBase with _$AuthController;
 
 abstract class _AuthControllerBase with Store {
   _AuthControllerBase() {
+    status = AuthStatus.waiting;
+
     _authRepository = Modular.get();
 
     status = _authRepository.currentUser == null
@@ -24,6 +28,9 @@ abstract class _AuthControllerBase with Store {
     _authRepository.onAuthStateChanged.listen((u) {
       setUser(u);
     });
+
+    user = _authRepository.currentUser;
+    status = user != null ? AuthStatus.loggedOn : AuthStatus.loggedOut;
   }
 
   IAuthRepository _authRepository;
@@ -41,7 +48,23 @@ abstract class _AuthControllerBase with Store {
   }
 
   @action
-  void setUser(UserModel value) => user = value;
+  void setUser(UserModel value) {
+    print('> AuthController : setUser = $value');
+    user = value;
+
+    status = user != null && user.emailVerified
+        ? AuthStatus.loggedOn
+        : AuthStatus.loggedOut;
+  }
+
+  @action
+  void updateProfile({String name, Uint8List image}) {
+    _authRepository.updateProfile(name, image);
+  }
+
+  void removeProfileImage() {
+    _authRepository.removeProfilePhoto();
+  }
 
   @action
   void alertHandled() => status = AuthStatus.loggedOut;
