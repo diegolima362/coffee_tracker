@@ -10,11 +10,17 @@ class AppController = _AppControllerBase with _$AppController;
 
 abstract class _AppControllerBase with Store {
   _AppControllerBase() {
-    darkThemePreference = Modular.get();
+    themeType = ThemeData.light();
+    themeMode = ThemeMode.light;
+
+    _localStorage = Modular.get();
+
+    _localStorage.onThemeChanged.listen((e) => loadTheme());
+
     loadTheme();
   }
 
-  ILocalStorage darkThemePreference;
+  ILocalStorage _localStorage;
 
   @observable
   ThemeData themeType;
@@ -27,7 +33,7 @@ abstract class _AppControllerBase with Store {
 
   @action
   Future<void> loadTheme() async {
-    final prefs = await darkThemePreference.isDarkTheme();
+    final prefs = _localStorage.isDarkTheme();
 
     if (prefs) {
       themeType = ThemeData.dark();
