@@ -1,4 +1,3 @@
-import 'package:coffee_tracker/app/modules/review/search_delegate/review_search.dart';
 import 'package:coffee_tracker/app/modules/review/sort_by.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
@@ -14,18 +13,41 @@ part 'review_controller.g.dart';
 class ReviewController = _ReviewControllerBase with _$ReviewController;
 
 abstract class _ReviewControllerBase with Store {
-  _ReviewControllerBase() {
-    searchDelegate = ReviewSearch(controller: this);
-    loadData();
-  }
-
-  ReviewSearch searchDelegate;
-
   @observable
   bool isLoading;
 
   @observable
+  String filter = '';
+
+  @observable
   ObservableList<ReviewModel> reviews;
+
+  _ReviewControllerBase() {
+    loadData();
+  }
+
+  Future<bool> get hasRestaurants async {
+    final IStorageRepository storage = Modular.get();
+    final data = await storage.getAllRestaurants();
+    return data.isNotEmpty;
+  }
+
+  @action
+  Future<void> addReview() async {
+    try {
+      if (kIsWeb || await CheckConnection.checkConnection()) {
+        if (!await hasRestaurants) {
+          print('> empty data');
+        } else {
+          Modular.to.pushNamed('/reviews/edit', arguments: null);
+        }
+      }
+    } on PlatformException {
+      rethrow;
+    } catch (error) {
+      print(error);
+    }
+  }
 
   @action
   Future<void> loadData() async {
@@ -43,32 +65,12 @@ abstract class _ReviewControllerBase with Store {
   }
 
   @action
-  void showDetails({@required ReviewModel review}) {
-    Modular.to.pushNamed('review/details', arguments: review);
+  void showDetails(ReviewModel review) {
+    Modular.to.pushNamed('/reviews/details', arguments: review);
   }
 
   @action
-  Future<void> addReview() async {
-    try {
-      if (await CheckConnection.checkConnection()) {
-        if (!await hasRestaurants) {
-          print('> empty data');
-        } else {
-          Modular.to.pushNamed('review/edit', arguments: null);
-        }
-      }
-    } on PlatformException {
-      rethrow;
-    } catch (error) {
-      print(error);
-    }
-  }
-
-  Future<bool> get hasRestaurants async {
-    final IStorageRepository storage = Modular.get();
-    final data = await storage.getAllRestaurants();
-    return data.isNotEmpty;
-  }
+  void setFilter(String value) => filter = value;
 
   @action
   void sortBy(SortBy value) {

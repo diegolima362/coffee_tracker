@@ -12,16 +12,27 @@ class ReviewInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(review.restaurantName),
-        subtitle: Text(Format.date(review.visitDate)),
+        title: Text(
+          review.restaurantName,
+          style: Theme.of(context).textTheme.bodyText1,
+        ),
+        subtitle: Text(
+          Format.date(review.visitDate),
+          style: Theme.of(context).textTheme.bodyText2,
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(review.rate.toString()),
+            Text(
+              review.rate.toStringAsFixed(1),
+              style: Theme.of(context).textTheme.caption,
+            ),
+            const SizedBox(width: 3),
             Icon(
               Icons.star,
+              color: Theme.of(context).textTheme.caption.color,
               size: 12,
-              color: Theme.of(context).textTheme.subtitle2.color,
             ),
           ],
         ),

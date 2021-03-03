@@ -1,6 +1,7 @@
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -26,7 +27,7 @@ abstract class _ReviewDetailsControllerBase with Store {
 
   Map<String, String> get shareData {
     final auth = Modular.get<AuthController>();
-    final name = auth.user.displayName;
+    final name = auth.user.displayName ?? 'User';
 
     return {
       'text': review.getRecommendationText(name),
@@ -37,6 +38,10 @@ abstract class _ReviewDetailsControllerBase with Store {
   @action
   void edit() {
     Modular.link.pushNamed('/edit', arguments: review);
+  }
+
+  void closePage() {
+    Modular.to.popUntil(ModalRoute.withName('/home'));
   }
 
   @action

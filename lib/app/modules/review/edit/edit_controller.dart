@@ -44,13 +44,16 @@ abstract class _EditControllerBase with Store {
 
     final date = DateTime.now();
 
-    setRate(review?.rate ?? 2.5);
+    setRate(review?.rate ?? 0);
     setVisitDate(review?.visitDate ?? date);
     setVisitTime(TimeOfDay.fromDateTime(review?.visitDate ?? date));
     setText(review?.text ?? '');
 
     _loadData();
   }
+
+  @computed
+  bool get canSave => restaurant != null;
 
   @action
   Future<void> _loadData() async {
@@ -84,7 +87,7 @@ abstract class _EditControllerBase with Store {
   }
 
   @action
-  void setRate(double value) => rate = value;
+  void setRate(double value) => rate = value > 5 ? 5 : value;
 
   @action
   void setRestaurant(RestaurantModel value) => restaurant = value;

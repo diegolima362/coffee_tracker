@@ -11,9 +11,9 @@ import 'review_page.dart';
 class ReviewModule extends WidgetModule {
   @override
   List<Bind> get binds => [
-        $EditController,
-        $ReviewController,
-        $ReviewDetailsController,
+        Bind((i) => EditController()),
+        Bind((i) => ReviewController()),
+        Bind((i) => ReviewDetailsController()),
       ];
 
   @override

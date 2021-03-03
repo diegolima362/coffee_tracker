@@ -1,12 +1,12 @@
-import 'package:coffee_tracker/app/modules/review/components/review_info_card.dart';
-import 'package:coffee_tracker/app/modules/review/sort_by.dart';
-import 'package:coffee_tracker/app/shared/components/empty_content.dart';
+import 'package:coffee_tracker/app/shared/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import 'components/review_info_card.dart';
 import 'review_controller.dart';
+import 'sort_by.dart';
 
 class ReviewPage extends StatefulWidget {
   final String title;
@@ -20,48 +20,22 @@ class ReviewPage extends StatefulWidget {
 class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
   //use 'controller' variable to access controller
 
+  bool _isSmall;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: controller.searchDelegate,
-              );
-            },
-          ),
-          buildPopupMenuButton(),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Adicionar Review',
-        child: Icon(Icons.add),
-        onPressed: _addReview,
-      ),
-      body: Observer(
-        builder: _buildContent,
-      ),
-    );
-  }
+    _isSmall = ResponsiveWidget.isSmallScreen(context);
 
-  Widget buildPopupMenuButton() {
-    return PopupMenuButton<SortBy>(
-      icon: Icon(Icons.sort_sharp),
-      onSelected: (value) => controller.sortBy(value),
-      itemBuilder: (BuildContext context) {
-        final choices = ['Restaurante', 'Nota', 'Data'];
-        return choices.map((String choice) {
-          return PopupMenuItem<SortBy>(
-            value: SortBy.values[choices.indexOf(choice)],
-            child: Text(choice),
-          );
-        }).toList();
-      },
+    return Scaffold(
+      floatingActionButton: _isSmall ? _buildFAB() : null,
+      body: Observer(
+        builder: (_) => Column(
+          children: [
+            _buildActionBar(),
+            Expanded(child: _buildContent(_)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -74,17 +48,61 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
         message: 'Sem Reviews Registradas',
       );
     } else {
+      final reviews = controller.reviews
+          .where((r) => r
+              .toString()
+              .toLowerCase()
+              .contains(controller.filter.toLowerCase()))
+          .toList();
+
+      final _length = reviews.length + 1;
+
       return ListView.builder(
-        itemCount: controller.reviews.length,
+        itemCount: _length,
         itemBuilder: (context, index) {
-          final review = controller.reviews[index];
+          if (_length == 1 && index == 0)
+            return Center(child: Text('Sem resultados'));
+
+          if (index == _length - 1) return SizedBox(height: 75.0);
+
+          final review = reviews[index];
+
           return ReviewInfoCard(
             review: review,
-            onTap: () => controller.showDetails(review: review),
+            onTap: () => controller.showDetails(review),
           );
         },
       );
     }
+  }
+
+  Widget _buildActionBar() {
+    return Card(
+      child: Row(
+        mainAxisAlignment: _isSmall
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.spaceEvenly,
+        children: [
+          if (!_isSmall) CustomAddButton(onTap: _addReview),
+          SearchBar(onChanged: controller.setFilter),
+          OrderBy(
+            choices: ['Restaurante', 'Nota', 'Data'],
+            values: SortBy.values,
+            onSelected: controller.sortBy,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFAB() {
+    return FloatingActionButton(
+      heroTag: 'add-review',
+      tooltip: 'Adicionar Review',
+      onPressed: _addReview,
+      child: _isSmall ? Icon(Icons.add) : Text('Adicionar Review'),
+      isExtended: true,
+    );
   }
 
   Future<void> _addReview() async {
