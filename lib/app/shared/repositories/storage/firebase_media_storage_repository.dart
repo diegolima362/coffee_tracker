@@ -1,26 +1,32 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
 import 'package:coffee_tracker/app/shared/models/media_info.dart';
 import 'package:coffee_tracker/app/shared/models/user_model.dart';
-import 'package:coffee_tracker/app/utils/connection_state.dart';
+import 'package:coffee_tracker/app/shared/repositories/local_storage/interfaces/preferences_storage_interface.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'interfaces/media_storage_repository_interface.dart';
 
-part 'firebase_media_storage_repository.g.dart';
-
 @Injectable()
 class FirebaseStorage implements IMediaStorageRepository {
+  UserModel _user;
+
+  Map<String, MediaInfo> _cache;
+
+  ILocalStorage _storage;
+
   FirebaseStorage() {
     _user = Modular.get<AuthController>().user;
-    Modular.get<AuthController>().onAuthStateChanged.listen((u) {
+
+    _storage = Modular.get();
+
+    final auth = Modular.get<AuthController>();
+    auth.onAuthStateChanged.listen((u) {
       _user = u;
-      if (u == null)
+      if (auth.status == AuthStatus.loggedOut)
         flushCache();
       else
         loadCache();
@@ -29,24 +35,13 @@ class FirebaseStorage implements IMediaStorageRepository {
     loadCache();
   }
 
-  UserModel _user;
-
-  Directory _tempDir;
-  Directory _docsDir;
-  Directory _imagesDir;
-  Directory _cachePath;
-  File _cacheFile;
-  Map<String, MediaInfo> _cache;
-
-  String getFullPath(String id) => '${_imagesDir.path}/$id.jpg';
-
-  int get numberOfPhotos => _cache.keys.length;
-
   int get numberOfNotSynced {
     int pending = 0;
     for (MediaInfo mi in _cache.values) if (!mi.synced) pending++;
     return pending;
   }
+
+  int get numberOfPhotos => _cache.keys.length;
 
   int get storageUsage {
     int s = 0;
@@ -54,191 +49,90 @@ class FirebaseStorage implements IMediaStorageRepository {
     return s;
   }
 
-  Future<void> loadCache() async {
-    print('> loading cache ...');
-
-    _tempDir = await getTemporaryDirectory();
-    _docsDir = await getApplicationDocumentsDirectory();
-    _imagesDir = Directory('${_docsDir.path}/mediacache/images');
-    _cachePath = Directory('${_docsDir.path}/mediacache');
-
-    _cache = {};
-
-    if (!_cachePath.existsSync()) {
-      _cachePath.createSync();
-      print('> create cache path: ${_cachePath.path}');
-    }
-
-    if (!_imagesDir.existsSync()) {
-      _imagesDir.createSync();
-      print('> create images path: ${_imagesDir.path}');
-    }
-
-    _cacheFile = File('${_cachePath.path}/cache.json');
-
-    if (_cacheFile.existsSync()) {
-      String contents = await _cacheFile.readAsString();
-      Map<String, dynamic> data = json.decode(contents);
-
-      data.forEach((key, value) => _cache[key] = MediaInfo.fromMap(value));
-    } else {
-      this._saveCache();
-    }
-    return;
-  }
-
-  Future<Image> fetchRestaurantImage({String restaurantId, String photoId}) {
-    return _fetch(restaurantId, 1, photoId);
-  }
-
-  void persistRestaurantImage({String restaurantId, File file}) {
-    _add(restaurantId, file, 1, 'image/jpeg');
-  }
-
   void deleteRestaurantImage({String photoId, String restaurantId}) {
-    print('> file ${_imagesDir.path}/$photoId.jpg');
-
     if (_cache.containsKey(photoId)) {
-      final file = File('${_imagesDir.path}/$photoId');
-
       final uid = _user.id;
 
       final ref = firebase_storage.FirebaseStorage.instance
           .ref('users/$uid/restaurants/$photoId.jpg');
 
       try {
-        final deleteTask = ref.delete();
-        deleteTask.whenComplete(() {
-          print('> delete succeeded');
-          if (_cache.containsKey(photoId)) {
-            _cache.remove(photoId);
-            if (file.existsSync()) file.deleteSync();
-            loadCache();
-          }
-        });
+        _cache.remove(photoId);
+
+        Future.wait([
+          _storage.removeImageIfExist(photoId),
+          ref.delete(),
+        ]);
       } catch (e) {
         print(e);
       }
     }
   }
 
-  Future<void> synchronize() async {
-    print('> synchronizing the cache...');
-    if (await CheckConnection.checkConnection())
-      _synchronizeImage();
-    else
-      print('> offline');
+  @override
+  void dispose() {
+    print('> dispose media cache');
+  }
+
+  Future<Uint8List> _fetchRemoteRestaurantImage(String restaurantId) async {
+    try {
+      return await firebase_storage.FirebaseStorage.instance
+          .ref('users/${_user.id}/restaurants/')
+          .child('$restaurantId.jpg')
+          .getData(10000000);
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<Uint8List> fetchRestaurantImage(
+      {String restaurantId, String photoId}) {
+    return _fetch(restaurantId, 1, photoId);
   }
 
   void flushCache() {
-    print('> flush cache');
-
-    if (_tempDir.existsSync()) {
-      _tempDir.deleteSync(recursive: true);
-    }
-
-    if (_imagesDir.existsSync()) {
-      _imagesDir.deleteSync(recursive: true);
-    }
-
-    if (_cachePath.existsSync()) {
-      _cachePath.deleteSync(recursive: true);
-    }
-
     _cache.clear();
-    print('> cache clear');
+
+    _storage.removeAllImages();
   }
 
-  void _saveCache() {
-    Map<String, dynamic> tmp = {};
+  void loadCache() {
+    _cache = {};
 
-    _cache.forEach((key, value) {
-      tmp[key] = value.toMap();
-    });
-    _cacheFile.writeAsStringSync(jsonEncode(tmp));
-  }
+    final data = _storage.loadCache();
 
-  Future<Image> _fetch(String restaurantId, int source, String id) async {
-    File file = File('${_imagesDir.path}/$id.jpg');
-
-    print('> fetch file: ${_imagesDir.path}/$id.jpg');
-
-    if (file.existsSync()) {
-      print('> file exists');
-      if (_cache.containsKey(id)) {
-        _cache[id].accessed = DateTime.now();
-      } else {
-        _cache[id] = MediaInfo(
-          id: id,
-          source: source,
-          restaurantId: restaurantId,
-          type: 'image/jpeg',
-          size: await file.length(),
-          accessed: DateTime.now(),
-          synced: true,
-        );
-      }
-      return Image.file(file, fit: BoxFit.cover);
-    } else {
-      print('> file not exists');
-
-      try {
-        final uid = _user.id;
-        print('> get on firebase: ${'users/$uid/restaurants/$id.jpg'}');
-
-        await firebase_storage.FirebaseStorage.instance
-            .ref('users/$uid/restaurants/')
-            .child('$id.jpg')
-            .writeToFile(file);
-      } catch (e) {
-        print(e);
-      }
-
-      _cache[id] = MediaInfo(
-        id: id,
-        source: source,
-        restaurantId: restaurantId,
-        type: 'image/jpeg',
-        size: await file.length(),
-        accessed: DateTime.now(),
-        synced: true,
-      );
-
-      this._saveCache();
-      this.loadCache();
-
-      return Image.file(file, fit: BoxFit.cover);
+    if (data.isNotEmpty) {
+      Map<String, dynamic> map = json.decode(data);
+      map.forEach((key, value) => _cache[key] = MediaInfo.fromMap(value));
     }
+
+    return;
+  }
+
+  void persistRestaurantImage({String restaurantId, Uint8List file}) {
+    _add(restaurantId, file, 1, 'image/jpeg');
+  }
+
+  Future<void> synchronize() async {
+    _synchronizeImage();
   }
 
   Future<void> _add(
     String restaurantId,
-    File file,
+    Uint8List file,
     int source,
     String type,
   ) async {
-    print('> saving image');
+    await _storage.removeImageIfExist(restaurantId);
 
-    final t = File('${_imagesDir.path}/$restaurantId.jpg');
-
-    if (t.existsSync()) {
-      print('> delete local file');
-      t.deleteSync();
-      loadCache();
-    }
-
-    final size = file.lengthSync();
-
-    print('> file: ${_imagesDir.path}/$restaurantId.jpg');
-    file.copySync('${_imagesDir.path}/$restaurantId.jpg');
-
-    file.deleteSync();
+    await _storage.saveRestaurantImage(restaurantId, base64Encode(file));
 
     _cache[restaurantId] = MediaInfo(
       id: restaurantId,
       source: source,
       restaurantId: restaurantId,
-      size: size,
+      size: file.elementSizeInBytes,
       accessed: DateTime.now(),
       type: type,
       synced: false,
@@ -248,24 +142,73 @@ class FirebaseStorage implements IMediaStorageRepository {
     synchronize();
   }
 
+  Future<Uint8List> _fetch(String restaurantId, int source, String id) async {
+    if (_cache.containsKey(id)) {
+      String _image = _storage.loadImageAsString(restaurantId);
+      Uint8List file;
+
+      if (_image != null) {
+        _cache[id].accessed = DateTime.now();
+        file = Uint8List.fromList(base64Decode(_image));
+      } else {
+        _cache.remove(id);
+      }
+
+      _saveCache();
+
+      return file;
+    } else {
+      final data = await _fetchRemoteRestaurantImage(restaurantId);
+
+      if (data != null) {
+        _cache[id] = MediaInfo(
+          id: id,
+          source: source,
+          restaurantId: restaurantId,
+          type: 'image/jpeg',
+          size: data.elementSizeInBytes,
+          accessed: DateTime.now(),
+          synced: true,
+        );
+
+        await Future.wait([
+          _storage.saveRestaurantImage(
+            restaurantId,
+            base64Encode(data),
+          ),
+        ]);
+        _saveCache();
+      }
+
+      return data;
+    }
+  }
+
   MediaInfo _getNotSynced() {
     for (MediaInfo mi in _cache.values) if (!mi.synced) return mi;
     return null;
+  }
+
+  Future<void> _saveCache() async {
+    Map<String, dynamic> tmp = {};
+
+    _cache.forEach((key, value) {
+      tmp[key] = value.toMap();
+    });
+
+    final data = jsonEncode(tmp);
+
+    await _storage.saveCache(data);
   }
 
   Future<void> _synchronizeImage() async {
     MediaInfo mediaInfo = _getNotSynced();
 
     if (mediaInfo != null) {
-      print('> sync file: ${_imagesDir.path}/${mediaInfo.id}.jpg');
-
-      final file = File('${_imagesDir.path}/${mediaInfo.id}.jpg');
-
-      if (file.existsSync()) {
-        print('> exists');
-      } else {
-        print('> not exists');
-      }
+      final data = await fetchRestaurantImage(
+        restaurantId: mediaInfo.restaurantId,
+        photoId: mediaInfo.id,
+      );
 
       final storage = firebase_storage.FirebaseStorage.instance;
 
@@ -278,13 +221,11 @@ class FirebaseStorage implements IMediaStorageRepository {
       final imageRef = storage.ref().child(imagePath);
 
       try {
-        final uploadTask = imageRef.putFile(file);
-        print('> trying to upload...');
+        final uploadTask = imageRef.putData(data);
         await uploadTask.whenComplete(() {
           if (_cache.containsKey(mediaInfo.id)) {
             _cache[mediaInfo.id].accessed = DateTime.now();
             _cache[mediaInfo.id].synced = true;
-            print('> upload succeeded');
             _saveCache();
             _synchronizeImage();
           }
@@ -293,12 +234,39 @@ class FirebaseStorage implements IMediaStorageRepository {
         print('> upload error: $error');
       }
     }
-
-    print('> done synchronizing');
   }
 
+  Uint8List _profilePhoto;
+
   @override
-  void dispose() {
-    print('> dispose media cache');
+  Future<Uint8List> fetchProfileImage() async {
+    if (_profilePhoto != null) {
+      return _profilePhoto;
+    }
+
+    String _image = _storage.loadImageAsString('profile');
+
+    if (_image != null) {
+      _profilePhoto = Uint8List.fromList(base64Decode(_image));
+
+      return _profilePhoto;
+    }
+
+    try {
+      _profilePhoto = await firebase_storage.FirebaseStorage.instance
+          .ref('users/${_user.id}/profile/')
+          .child('avatar.jpg')
+          .getData(10000000);
+
+      if (_profilePhoto != null)
+        _storage.saveProfileImage(
+          base64Encode(_profilePhoto),
+        );
+
+      return _profilePhoto;
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 }

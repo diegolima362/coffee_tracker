@@ -7,8 +7,6 @@ import 'package:flutter_modular/flutter_modular.dart';
 
 import 'interfaces/storage_repository_interface.dart';
 
-part 'firestore_storage_repository.g.dart';
-
 @Injectable()
 class FireStoreStorageRepository implements IStorageRepository {
   List<RestaurantModel> _restaurants;
@@ -25,7 +23,9 @@ class FireStoreStorageRepository implements IStorageRepository {
   @override
   Future<List<RestaurantModel>> getAllRestaurants() async {
     if (_restaurants == null || _restaurants.isEmpty)
-      _restaurants = List<RestaurantModel>();
+      _restaurants = <RestaurantModel>[];
+
+    if (_user == null) return _restaurants;
 
     final uid = _user.id;
     final data = await FirebaseFirestore.instance
@@ -49,7 +49,9 @@ class FireStoreStorageRepository implements IStorageRepository {
 
   @override
   Future<List<ReviewModel>> getAllReviews() async {
-    if (_reviews == null) _reviews = List<ReviewModel>();
+    if (_reviews == null) _reviews = <ReviewModel>[];
+
+    if (_user == null) return _reviews;
 
     final uid = _user.id;
     final data =

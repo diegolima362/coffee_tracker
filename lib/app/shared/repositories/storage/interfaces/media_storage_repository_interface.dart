@@ -1,26 +1,25 @@
-import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 abstract class IMediaStorageRepository implements Disposable {
-  int get numberOfPhotos;
-
   int get numberOfNotSynced;
+
+  int get numberOfPhotos;
 
   int get storageUsage;
 
-  String getFullPath(String photoId);
-
-  Future<void> loadCache();
-
-  Future<Image> fetchRestaurantImage({String restaurantId, String photoId});
-
-  void persistRestaurantImage({String restaurantId, File file});
-
   void deleteRestaurantImage({String restaurantId, String photoId});
+
+  Future<Uint8List> fetchRestaurantImage({String restaurantId, String photoId});
+
+  void flushCache();
+
+  void loadCache();
+
+  void persistRestaurantImage({String restaurantId, Uint8List file});
 
   Future<void> synchronize();
 
-  void flushCache();
+  Future<Uint8List> fetchProfileImage();
 }
