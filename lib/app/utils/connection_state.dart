@@ -11,18 +11,21 @@ class CheckConnection {
         return true;
       }
     } on SocketException catch (e) {
+      print('Error: Sem conexão com a internet');
       throw PlatformException(
         message: 'Sem conexão com a internet',
         code: 'error_connection',
         details: e.toString(),
       );
     } on TimeoutException catch (e) {
+      print('Error: Sem conexão com a internet');
       throw PlatformException(
         message: 'Problemas na conexão',
         code: 'error_connection',
         details: e.toString(),
       );
     } catch (e) {
+      print('Error: Sem conexão com a internet');
       throw PlatformException(
         message: 'Problemas na conexão',
         code: 'error_connection',
