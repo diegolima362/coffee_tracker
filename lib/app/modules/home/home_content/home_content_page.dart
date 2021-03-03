@@ -1,10 +1,8 @@
-import 'package:coffee_tracker/app/modules/restaurant/components/restaurant_info_card.dart';
-import 'package:coffee_tracker/app/modules/review/components/review_info_card.dart';
-import 'package:coffee_tracker/app/shared/components/empty_content.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import 'components/carousel.dart';
+import 'components/last_reviews.dart';
 import 'home_content_controller.dart';
 
 class HomeContentPage extends StatefulWidget {
@@ -21,106 +19,48 @@ class _HomeContentPageState
     extends ModularState<HomeContentPage, HomeContentController> {
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    final portrait = height > width;
     final screenSize = MediaQuery.of(context).size;
 
-    final textStyle = Theme.of(context).textTheme.bodyText2;
-
     return Scaffold(
-      appBar: AppBar(title: Text('Home')),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 5),
-            Text(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+              top: height * 0.05,
+              left: 8,
+              bottom: height * 0.01,
+            ),
+            child: Text(
               'Restaurantes Favoritos',
-              style: textStyle,
+              style: Theme.of(context).textTheme.headline6,
             ),
-            SizedBox(height: screenSize.height * .015),
-            Container(
-              child: _buildFavorites(),
-              height: height * (portrait ? .2 : .3),
+          ),
+          FavoritesCarousel(
+            controller: controller,
+            height: height * .25,
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              top: height * 0.05,
+              left: 8,
+              bottom: height * 0.01,
             ),
-            SizedBox(height: 10),
-            Text(
+            child: Text(
               'Ultimas Reviews',
-              style: textStyle,
+              style: Theme.of(context).textTheme.headline6,
             ),
-            SizedBox(height: screenSize.height * .015),
-            Container(
-              child: _buildLastReviews(),
-              height: screenSize.height * .45,
+          ),
+          Expanded(
+            child: LastReviews(
+              controller: controller,
+              height: screenSize.height * .25,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildFavorites() {
-    return Observer(
-      builder: (BuildContext context) {
-        final width = MediaQuery.of(context).size.width;
-        final height = MediaQuery.of(context).size.height;
-        final portrait = height > width;
-        final _length = controller.restaurants.length;
-
-        if (controller.loadingRestaurants) {
-          return Center(child: CircularProgressIndicator());
-        } else if (controller.restaurants.isEmpty) {
-          return EmptyContent(
-            title: 'Nada por aqui',
-            message: 'Sem Restaurantes registrados!',
-          );
-        } else {
-          return ListView.builder(
-            itemCount: _length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              final restaurant = controller.restaurants[index];
-              return RestaurantInfoCard(
-                mediaStorage: controller.mediaStorage,
-                restaurant: restaurant,
-                height: (portrait ? height : width) / 4,
-                width: (portrait ? width : height) / 3,
-                onTap: () => controller.showRestaurantDetails(restaurant),
-              );
-            },
-          );
-        }
-      },
-    );
-  }
-
-  Widget _buildLastReviews() {
-    return Observer(
-      builder: (_) {
-        final reviews = controller.reviews;
-        final _length = reviews.length;
-        if (controller.loadingReviews) {
-          return Center(child: CircularProgressIndicator());
-        } else if (reviews.isEmpty) {
-          return EmptyContent(
-            title: 'Nada por aqui',
-            message: 'Sem Reviews registradas!',
-          );
-        } else {
-          return ListView.builder(
-            itemCount: _length,
-            itemBuilder: (context, index) {
-              final review = reviews[index];
-              return ReviewInfoCard(
-                review: review,
-                onTap: () => controller.showReviewsDetails(review),
-              );
-            },
-          );
-        }
-      },
     );
   }
 }

@@ -1,7 +1,9 @@
+import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/models/review_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -27,9 +29,12 @@ abstract class _HomeContentBase with Store {
 
   _HomeContentBase() {
     _storage = Modular.get();
+
     mediaStorage = Modular.get();
 
-    mediaStorage.loadCache();
+    if (!kIsWeb) {
+      mediaStorage.loadCache();
+    }
 
     _loadRestaurants();
     _loadReviews();
@@ -67,13 +72,15 @@ abstract class _HomeContentBase with Store {
     loadingReviews = false;
   }
 
+  String get uid => Modular.get<AuthController>().user.id;
+
   @action
   void showRestaurantDetails(RestaurantModel restaurant) {
-    Modular.to.pushNamed('/restaurant/details', arguments: restaurant);
+    Modular.to.pushNamed('/restaurants/details', arguments: restaurant);
   }
 
   @action
   void showReviewsDetails(ReviewModel review) {
-    Modular.to.pushNamed('/review/details', arguments: review);
+    Modular.to.pushNamed('/reviews/details', arguments: review);
   }
 }
