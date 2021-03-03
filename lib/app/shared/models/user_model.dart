@@ -12,4 +12,8 @@ class UserModel {
     this.displayName,
     this.emailVerified,
   });
+
+  String toString() {
+    return '{ id : $id, displayName: $displayName, emailVerified: $emailVerified }';
+  }
 }

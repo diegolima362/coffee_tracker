@@ -26,7 +26,7 @@ class RestaurantModel {
     this.imageURL = '',
     this.commentary = '',
   }) {
-    _reviews = List<ReviewModel>();
+    _reviews = <ReviewModel>[];
   }
 
   List<ReviewModel> get allReviews => _reviews;

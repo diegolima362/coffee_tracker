@@ -43,7 +43,7 @@ class ReviewModel {
       restaurantName: map['restaurantName'],
       reviewDate: _reviewDate,
       visitDate: _visitDate,
-      rate: map['rate'],
+      rate: double.tryParse(map['rate'].toString()),
       text: map['text'],
     );
   }
@@ -60,13 +60,7 @@ class ReviewModel {
 
   @override
   String toString() {
-    return "{'id': $id,"
-        "'restaurantName': $restaurantName,"
-        "'restaurantId': $restaurantId,"
-        "'reviewDate': $reviewDate"
-        "'visitDate': $visitDate,"
-        "'rate': $rate,"
-        "'text': $text}";
+    return '$restaurantName em ${Format.fullDate(reviewDate)}';
   }
 
   @override
