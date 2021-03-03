@@ -1,211 +1,65 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <base href="/" />
-
-  <meta charset="UTF-8" />
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
-  <meta name="description" content="A app to track visited coffee shops." />
-
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <meta name="apple-mobile-web-app-title" content="Coffee Tracker" />
-  <link rel="apple-touch-icon" href="icons/Icon-192.png" />
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/ico" href="favicon.ico" />
-
-  <title>Coffee Tracker</title>
-  <link rel="manifest" href="manifest.json" />
-
-  <meta name="google-signin-client_id"
-    content="781202879159-r1n4u70ggjotuafq07vspn763oeicon2.apps.googleusercontent.com" />
-
-  <style>
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pure-material-progress-circular {
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      box-sizing: border-box;
-      border: none;
-      border-radius: 50%;
-      padding: 0.25em;
-      width: 3em;
-      height: 3em;
-      color: rgb(var(--pure-material-primary-rgb, 12, 12, 12));
-      background-color: transparent;
-      font-size: 16px;
-      overflow: hidden;
-    }
-
-    .pure-material-progress-circular::-webkit-progress-bar {
-      background-color: transparent;
-    }
-
-    /* Indeterminate */
-    .pure-material-progress-circular:indeterminate {
-      -webkit-mask-image: linear-gradient(transparent 50%, black 50%), linear-gradient(to right, transparent 50%, black 50%);
-      mask-image: linear-gradient(transparent 50%, black 50%), linear-gradient(to right, transparent 50%, black 50%);
-      animation: pure-material-progress-circular 6s infinite cubic-bezier(0.3, 0.6, 1, 1);
-    }
-
-    :-ms-lang(x),
-    .pure-material-progress-circular:indeterminate {
-      animation: none;
-    }
-
-    .pure-material-progress-circular:indeterminate::before,
-    .pure-material-progress-circular:indeterminate::-webkit-progress-value {
-      content: "";
-      display: block;
-      box-sizing: border-box;
-      margin-bottom: 0.25em;
-      border: solid 0.25em transparent;
-      border-top-color: currentColor;
-      border-radius: 50%;
-      width: 100% !important;
-      height: 100%;
-      background-color: transparent;
-      animation: pure-material-progress-circular-pseudo 0.75s infinite linear alternate;
-    }
-
-    .pure-material-progress-circular:indeterminate::-moz-progress-bar {
-      box-sizing: border-box;
-      border: solid 0.25em transparent;
-      border-top-color: currentColor;
-      border-radius: 50%;
-      width: 100%;
-      height: 100%;
-      background-color: transparent;
-      animation: pure-material-progress-circular-pseudo 0.75s infinite linear alternate;
-    }
-
-    .pure-material-progress-circular:indeterminate::-ms-fill {
-      animation-name: -ms-ring;
-    }
-
-    @keyframes pure-material-progress-circular {
-      0% {
-        transform: rotate(0deg);
+    <base href="/" />
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="An app to track visited coffee shops." />
+    <!-- iOS meta tags & icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Coffee Tracker" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/ico" href="favicon.ico" />
+    <title>Coffee Tracker</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="google-signin-client_id" content="781202879159-r1n4u70ggjotuafq07vspn763oeicon2.apps.googleusercontent.com" />
+    <style>
+      .logo {
+        position: fixed;
+        height: 2em;
+        width: 2em;
+        overflow: show;
+        margin: auto;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
       }
-
-      12.5% {
-        transform: rotate(180deg);
-        animation-timing-function: linear;
-      }
-
-      25% {
-        transform: rotate(630deg);
-      }
-
-      37.5% {
-        transform: rotate(810deg);
-        animation-timing-function: linear;
-      }
-
-      50% {
-        transform: rotate(1260deg);
-      }
-
-      62.5% {
-        transform: rotate(1440deg);
-        animation-timing-function: linear;
-      }
-
-      75% {
-        transform: rotate(1890deg);
-      }
-
-      87.5% {
-        transform: rotate(2070deg);
-        animation-timing-function: linear;
-      }
-
-      100% {
-        transform: rotate(2520deg);
-      }
-    }
-
-    @keyframes pure-material-progress-circular-pseudo {
-      0% {
-        transform: rotate(-30deg);
-      }
-
-      29.4% {
-        border-left-color: transparent;
-      }
-
-      29.41% {
-        border-left-color: currentColor;
-      }
-
-      64.7% {
-        border-bottom-color: transparent;
-      }
-
-      64.71% {
-        border-bottom-color: currentColor;
-      }
-
-      100% {
-        border-left-color: currentColor;
-        border-bottom-color: currentColor;
-        transform: rotate(225deg);
-      }
-    }
-  </style>
-
+    </style>
 </head>
-
 <body>
-
-  <progress class="pure-material-progress-circular" />
-
-  <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-analytics.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
-
-  <script>
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    var firebaseConfig = {
-      apiKey: "AIzaSyC15Xz3Re8UogArt-SDHZi90bHt_A3B7H0",
-      authDomain: "coffee-tracker-b6f61.firebaseapp.com",
-      databaseURL: "https://coffee-tracker-b6f61.firebaseio.com",
-      projectId: "coffee-tracker-b6f61",
-      storageBucket: "coffee-tracker-b6f61.appspot.com",
-      messagingSenderId: "781202879159",
-      appId: "1:781202879159:web:438d7d44d586786d615332",
-      measurementId: "G-8DRXZQ2QE4",
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-  </script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("flutter-first-frame", function () {
-        navigator.serviceWorker.register("flutter_service_worker.js");
-      });
-    }
-  </script>
-  <script src="main.dart.js" type="application/javascript"></script>
+<img src="icons/logo.png" alt="Logo" class="logo" width="192" height="192"/>
+<script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+<script>
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      var firebaseConfig = {
+        apiKey: "AIzaSyC15Xz3Re8UogArt-SDHZi90bHt_A3B7H0",
+        authDomain: "coffee-tracker-b6f61.firebaseapp.com",
+        databaseURL: "https://coffee-tracker-b6f61.firebaseio.com",
+        projectId: "coffee-tracker-b6f61",
+        storageBucket: "coffee-tracker-b6f61.appspot.com",
+        messagingSenderId: "781202879159",
+        appId: "1:781202879159:web:438d7d44d586786d615332",
+        measurementId: "G-8DRXZQ2QE4",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
+<script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("flutter-first-frame", function () {
+          navigator.serviceWorker.register("flutter_service_worker.js");
+        });
+      }
+    </script>
+<script src="main.dart.js" type="application/javascript"></script>
 </body>
-
 </html>
