@@ -1,182 +1,58 @@
 import 'package:flutter/material.dart';
 
 class CustomThemes {
-  CustomThemes._();
+  static ThemeData get dark {
+    final accent = const Color(0xffbdbdbd);
 
-  static Map<int, Color> _getSwash(Color accentColor) {
-    return {
-      50: accentColor.withOpacity(.1),
-      100: accentColor.withOpacity(.2),
-      200: accentColor.withOpacity(.3),
-      300: accentColor.withOpacity(.4),
-      400: accentColor.withOpacity(.5),
-      500: accentColor.withOpacity(.6),
-      600: accentColor.withOpacity(.7),
-      700: accentColor.withOpacity(.8),
-      800: accentColor.withOpacity(.9),
-      900: accentColor.withOpacity(1),
-    };
-  }
-
-  static ThemeData get light {
-    final white = Color(0xFFFEFEFE);
-
-    // final otherWhite = Color(0xFFFEFEFE);
-    // final red = Color(0xFFE63946);
-    final textColor = Color(0xFF1D3557);
-    final accent = Color(0xFF1D3557);
-    final primary = Color(0xFF457B9D);
-    final disableIcon = Color(0xFFDDDDDD);
-    final selectedColor = Color(0xFF1D3557);
-    final cardColor = Color(0xFFFFFFFF);
-    final buttonColor = Color(0xFF274C77);
-    final iconColor = Color(0xFF1D3557);
-    final dividerColor = Color(0xFFDDDDDD);
-    final anotherWhite = Color(0xFFAAAAAA);
-    final swash = MaterialColor(accent.value, _getSwash(accent));
-
-    return ThemeData(
-      primarySwatch: swash,
-      brightness: Brightness.light,
-      accentColorBrightness: Brightness.light,
-      primaryColorBrightness: Brightness.light,
-      indicatorColor: textColor,
-      backgroundColor: white,
-      primaryColor: primary,
-      buttonColor: buttonColor,
-      buttonTheme: ButtonThemeData(
-        buttonColor: buttonColor,
-        textTheme: ButtonTextTheme.primary,
-      ),
+    return ThemeData.dark().copyWith(
       accentColor: accent,
-      canvasColor: white,
-      disabledColor: disableIcon,
-      iconTheme: IconThemeData(color: iconColor),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        elevation: 0,
-        backgroundColor: white,
-        unselectedIconTheme: IconThemeData(color: disableIcon),
-        selectedIconTheme: IconThemeData(color: selectedColor),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: accent,
       ),
-      cardTheme: CardTheme(color: cardColor),
-      dividerColor: dividerColor,
-      textTheme: TextTheme(
-        button: TextStyle(
-          color: white,
-        ),
-        subtitle2: TextStyle(
-          color: anotherWhite,
-        ),
-        subtitle1: TextStyle(
-          color: textColor,
-        ),
-        bodyText1: TextStyle(
-          fontSize: 16.0,
-          color: textColor,
-        ),
-        bodyText2: TextStyle(
-          fontSize: 16.0,
-          color: textColor,
-        ),
+      canvasColor: const Color(0xff181818),
+      backgroundColor: const Color(0xff181818),
+      cardColor: const Color(0xff1d1d1d),
+      cardTheme: const CardTheme(
+        color: const Color(0xff1d1d1d),
+      ),
+      appBarTheme: const AppBarTheme(
+        color: const Color(0xff202020),
+        brightness: Brightness.dark,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: textColor,
-        foregroundColor: white,
+        backgroundColor: accent,
       ),
-      appBarTheme: AppBarTheme(
-        iconTheme: IconThemeData(color: textColor),
-        actionsIconTheme: IconThemeData(color: textColor),
-        color: white,
-        brightness: Brightness.light,
-        textTheme: TextTheme(
-          headline6: TextStyle(
-            fontSize: 24.0,
-            color: textColor,
-          ),
-        ),
-        elevation: 0,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xff202020),
       ),
     );
   }
 
-  static ThemeData get dark {
-    final white = Color(0xFFFEFEFE);
-    final dark = Color(0xFF121212);
-    // final otherWhite = Color(0xFFFEFEFE);
-    // final red = Color(0xFFE63946);
-    final textColor = Color(0xFFEEEEEE);
-    final accent = Color(0xFFE43F5A);
-    final primary = Color(0xFFE43F5A);
-    final disableIcon = Color(0xFFDDDDDD);
-    final selectedColor = Color(0xFFE43F5A);
-    final cardColor = Color(0xFF252525);
-    final buttonColor = Color(0xFFE43F5A);
-    final iconColor = Color(0xFFE43F5A);
-    final dividerColor = Color(0xFF121212);
-    final anotherWhite = Color(0xFFAAAAAA);
-    final swash = MaterialColor(accent.value, _getSwash(accent));
-
-    return ThemeData(
-      primarySwatch: swash,
-      brightness: Brightness.dark,
-      accentColorBrightness: Brightness.dark,
-      primaryColorBrightness: Brightness.dark,
-      indicatorColor: textColor,
-      toggleableActiveColor: accent,
-      backgroundColor: dark,
-      primaryColor: primary,
-      buttonColor: buttonColor,
-      buttonTheme: ButtonThemeData(
-        buttonColor: buttonColor,
-        textTheme: ButtonTextTheme.primary,
+  static ThemeData get light {
+    return ThemeData.light().copyWith(
+      primaryColor: const Color(0xff344955),
+      accentColor: const Color(0xff4a6572),
+      canvasColor: const Color(0xfffafafa),
+      backgroundColor: const Color(0xfffafafa),
+      cardColor: const Color(0xffffffff),
+      appBarTheme: const AppBarTheme(
+        color: const Color(0xffffffff),
+        elevation: 1.0,
+        brightness: Brightness.light,
       ),
-      accentColor: accent,
-      canvasColor: dark,
-      disabledColor: disableIcon,
-      iconTheme: IconThemeData(color: iconColor),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        elevation: 0,
-        backgroundColor: dark,
-        unselectedIconTheme: IconThemeData(color: disableIcon),
-        selectedIconTheme: IconThemeData(color: selectedColor),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: const Color(0xfff9aa33),
       ),
-      cardTheme: CardTheme(color: cardColor),
-      dividerColor: dividerColor,
-      textTheme: TextTheme(
-        button: TextStyle(
-          color: white,
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Color(0xff344955),
+        unselectedIconTheme: IconThemeData(
+          color: const Color(0xffdddddd),
         ),
-        subtitle2: TextStyle(
-          color: anotherWhite,
+        selectedIconTheme: const IconThemeData(
+          color: const Color(0xffffffff),
         ),
-        subtitle1: TextStyle(
-          color: textColor,
-        ),
-        bodyText1: TextStyle(
-          fontSize: 16.0,
-          color: textColor,
-        ),
-        bodyText2: TextStyle(
-          fontSize: 16.0,
-          color: textColor,
-        ),
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: iconColor,
-        foregroundColor: dark,
-      ),
-      appBarTheme: AppBarTheme(
-        iconTheme: IconThemeData(color: textColor),
-        actionsIconTheme: IconThemeData(color: textColor),
-        color: dark,
-        brightness: Brightness.dark,
-        textTheme: TextTheme(
-          headline6: TextStyle(
-            fontSize: 24.0,
-            color: textColor,
-          ),
-        ),
-        elevation: 0,
       ),
     );
   }
