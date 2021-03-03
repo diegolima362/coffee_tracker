@@ -13,8 +13,6 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends ModularState<LandingPage, LandingController> {
-  //use 'controller' variable to access controller
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
