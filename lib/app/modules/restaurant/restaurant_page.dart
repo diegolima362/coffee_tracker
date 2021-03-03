@@ -1,12 +1,12 @@
-import 'package:coffee_tracker/app/modules/restaurant/components/restaurant_info_card.dart';
-import 'package:coffee_tracker/app/modules/restaurant/sort_by.dart';
-import 'package:coffee_tracker/app/shared/components/empty_content.dart';
+import 'package:coffee_tracker/app/shared/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import 'components/restaurant_info_card.dart';
 import 'restaurant_controller.dart';
+import 'sort_by.dart';
 
 class RestaurantPage extends StatefulWidget {
   final String title;
@@ -19,60 +19,47 @@ class RestaurantPage extends StatefulWidget {
 
 class _RestaurantPageState
     extends ModularState<RestaurantPage, RestaurantController> {
-  //use 'controller' variable to access controller
+  bool _isSmall;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: controller.searchDelegate,
-              );
-            },
-          ),
-          buildPopupMenuButton()
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        tooltip: 'Adicionar Restaurante',
-        onPressed: _addRestaurant,
-      ),
-      body: Observer(
-        builder: _buildContent,
-      ),
-    );
-  }
+    _isSmall = ResponsiveWidget.isSmallScreen(context);
 
-  Widget buildPopupMenuButton() {
-    return PopupMenuButton<SortBy>(
-      icon: Icon(Icons.sort_sharp),
-      onSelected: (value) => controller.sortBy(value),
-      itemBuilder: (BuildContext context) {
-        final choices = ['A-Z', 'Nota', 'Data', 'Cidade', 'Visitas'];
-        return choices.map((String choice) {
-          return PopupMenuItem<SortBy>(
-            value: SortBy.values[choices.indexOf(choice)],
-            child: Text(choice),
-          );
-        }).toList();
-      },
+    return Scaffold(
+      floatingActionButton: _isSmall ? _buildFAB() : null,
+      body: Observer(
+        builder: (_) => Column(
+          children: [
+            _buildActionBar(),
+            Expanded(child: _buildContent(_)),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildContent(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-    final portrait = height > width;
-    final aspect = portrait ? width / (height / 6) : height / (width / 6);
+    final width = ResponsiveWidget.contentWidth(context);
+    final portrait = ResponsiveWidget.isPortrait(context);
 
-    final _length = controller.restaurants.length;
+    double aspect;
+    int count;
+    double w;
+
+    if (!_isSmall || !portrait) {
+      count = 2;
+      aspect = 5.0 / 2.0;
+      w = width / 2.0;
+    } else {
+      count = 1;
+      aspect = 3.0;
+      w = width;
+    }
 
     if (controller.isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -82,24 +69,59 @@ class _RestaurantPageState
         message: 'Sem Restaurantes registrados!',
       );
     } else {
+      final restaurants = controller.restaurants
+          .where((r) => r
+              .toString()
+              .toLowerCase()
+              .contains(controller.filter.toLowerCase()))
+          .toList();
+
+      final _length = restaurants.length + 1;
+
       return GridView.builder(
+        padding: EdgeInsets.zero,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: portrait ? 1 : 2,
+          crossAxisCount: count,
           childAspectRatio: aspect,
         ),
         itemCount: _length,
         itemBuilder: (context, index) {
-          final restaurant = controller.restaurants[index];
+          if (_length == 1 && index == 0)
+            return Center(child: Text('Sem resultados'));
+
+          if (index == _length - 1) return SizedBox(height: 75.0);
+
+          final restaurant = restaurants[index];
           return RestaurantInfoCard(
             restaurant: restaurant,
             mediaStorage: controller.mediaStorage,
             expanded: true,
-            height: (portrait ? height : width) / 6,
-            onTap: () => controller.showDetails(restaurant: restaurant),
+            width: w,
+            height: w * .6,
+            onTap: () => controller.showDetails(restaurant),
           );
         },
       );
     }
+  }
+
+  Widget _buildActionBar() {
+    return Card(
+      child: Row(
+        mainAxisAlignment: _isSmall
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.spaceEvenly,
+        children: [
+          if (!_isSmall) CustomAddButton(onTap: _addRestaurant),
+          SearchBar(onChanged: controller.setFilter),
+          OrderBy<SortBy>(
+            onSelected: (value) => controller.sortBy(value),
+            choices: ['A-Z', 'Nota', 'Data', 'Cidade', 'Visitas'],
+            values: SortBy.values,
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _addRestaurant() async {
@@ -118,5 +140,14 @@ class _RestaurantPageState
     } catch (e) {
       print(e);
     }
+  }
+
+  Widget _buildFAB() {
+    return FloatingActionButton(
+      heroTag: 'add-restaurant',
+      tooltip: 'Adicionar Restaurante',
+      onPressed: _addRestaurant,
+      child: Icon(Icons.add),
+    );
   }
 }

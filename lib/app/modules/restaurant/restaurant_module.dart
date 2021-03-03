@@ -11,9 +11,9 @@ import 'restaurant_page.dart';
 class RestaurantModule extends WidgetModule {
   @override
   List<Bind> get binds => [
-        $EditController,
-        $RestaurantDetailsController,
-        $RestaurantController,
+        Bind((i) => EditController()),
+        Bind((i) => RestaurantDetailsController()),
+        Bind((i) => RestaurantController()),
       ];
 
   @override

@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/utils/format.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class RestaurantInfoCard extends StatelessWidget {
@@ -18,7 +21,7 @@ class RestaurantInfoCard extends StatelessWidget {
   const RestaurantInfoCard({
     Key key,
     @required this.restaurant,
-    @required this.mediaStorage,
+    this.mediaStorage,
     this.width,
     this.height,
     this.cardColor,
@@ -31,133 +34,146 @@ class RestaurantInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _ratio = MediaQuery.of(context).size.aspectRatio;
-    final _width =
-        width ?? MediaQuery.of(context).size.width * (expanded ? 1 : 0.35);
-    final _height =
-        height ?? MediaQuery.of(context).size.height * (expanded ? 0.15 : 0.25);
-    final textColor = expanded ? null : Colors.white;
-
-    final _imageWidth = expanded ? _width * (_ratio > 1 ? 0.15 : 0.3) : _width;
-    final _textLeftPosition = _width * .015 + (expanded ? _imageWidth : 0);
-
-    final w = MediaQuery.of(context).size.width * .6;
-    final h = MediaQuery.of(context).size.height * .4;
-    final fit = BoxFit.cover;
-
-    final subtitleColor = Theme.of(context).textTheme.subtitle2.color;
-
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        margin: const EdgeInsets.all(2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
-        ),
-        child: Stack(
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(radius),
-              child: Container(
-                color: overlayColor,
-                width: _imageWidth,
-                height: _height,
-                child: restaurant.imageURL != null &&
-                        restaurant.imageURL.isNotEmpty
-                    ? buildImage()
-                    : Image.asset(
-                        'images/no-image.png',
-                        width: w,
-                        height: h,
-                        fit: fit,
-                      ),
-              ),
-            ),
-            Opacity(
-              opacity: opacity,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: Container(
-                  color: overlayColor,
-                  width: _imageWidth,
-                  height: _height,
-                ),
-              ),
-            ),
-            Positioned(
-              left: _textLeftPosition,
-              bottom: _height * 0.01,
-              child: Container(
-                width: _imageWidth * (expanded ? 1.5 : 0.95),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      Format.capitalString(restaurant.name),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: expanded ? 20 : 16,
-                      ),
-                    ),
-                    Text(
-                      '${Format.capitalString(restaurant.city)}, ${restaurant.state.toUpperCase()}',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: subtitleColor, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (restaurant.allReviews?.isNotEmpty ?? false)
-              Positioned(
-                right: _width * 0.01,
-                top: _height * 0.05,
-                child: Row(
-                  children: [
-                    Text(
-                      restaurant.rate.toStringAsFixed(1),
-                      style: TextStyle(color: textColor),
-                    ),
-                    SizedBox(width: 3),
-                    Icon(
-                      Icons.star,
-                      size: 16,
-                      color: Theme.of(context).textTheme.subtitle2.color,
-                    ),
-                  ],
-                ),
-              ),
-          ],
+        semanticContainer: true,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: Container(
+          width: width,
+          height: height,
+          child: expanded
+              ? _buildExpandedCard(context)
+              : _buildCompactCard(context),
         ),
       ),
     );
   }
 
-  Widget buildImage() {
+  Widget _buildCompactCard(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _buildImage(),
+        ),
+        _buildTitle(context),
+      ],
+    );
+  }
+
+  Widget _buildExpandedCard(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: width * .4,
+          child: _buildImage(),
+        ),
+        const SizedBox(width: 10),
+        _text(context),
+      ],
+    );
+  }
+
+  Widget _text(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(height: 10),
+        if (restaurant.allReviews?.isNotEmpty ?? false)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                restaurant.rate.toStringAsFixed(1),
+                style: Theme.of(context).textTheme.caption,
+              ),
+              const SizedBox(width: 2.0),
+              Icon(
+                Icons.star,
+                color: Theme.of(context).textTheme.caption.color,
+                size: 12,
+              ),
+            ],
+          ),
+        SizedBox(height: 10),
+        Text(
+          Format.capitalString(restaurant.name),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.headline6,
+        ),
+        SizedBox(height: 10),
+        Text(
+          '${Format.capitalString(restaurant.city)}, ${restaurant.state.toUpperCase()}',
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyText1,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitle(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            Format.capitalString(restaurant.name),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
+          Text(
+            '${Format.capitalString(restaurant.city)}, ${restaurant.state.toUpperCase()}',
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.caption,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImage() {
     if (restaurant.imageURL.isEmpty) {
-      return Image.asset(
-        'images/no-image.png',
-        fit: BoxFit.cover,
-      );
+      return _noImage();
     }
 
-    return FutureBuilder<Image>(
+    return FutureBuilder<Uint8List>(
       future: mediaStorage.fetchRestaurantImage(
         restaurantId: restaurant.id,
         photoId: restaurant.imageURL,
       ),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return snapshot.data;
-        } else {
-          return Image.asset(
-            'images/no-image.png',
+        if (snapshot.hasData && snapshot.data.isNotEmpty) {
+          return Image.memory(
+            snapshot.data,
             fit: BoxFit.cover,
+            width: width,
+            height: height,
+            color: Color.fromRGBO(100, 100, 100, 1),
+            colorBlendMode: BlendMode.modulate,
           );
+        } else {
+          return _noImage();
         }
       },
+    );
+  }
+
+  Widget _noImage() {
+    return Image.asset(
+      'images/no-image.png',
+      fit: BoxFit.cover,
+      color: Color.fromRGBO(100, 100, 100, 1),
+      width: width,
+      height: height,
+      colorBlendMode: BlendMode.modulate,
     );
   }
 }

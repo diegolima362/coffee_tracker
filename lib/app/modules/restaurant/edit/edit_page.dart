@@ -1,9 +1,10 @@
-import 'dart:io';
-
+import 'package:coffee_tracker/app/shared/components/customDetailsPage.dart';
+import 'package:coffee_tracker/app/shared/components/responsive.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'edit_controller.dart';
 
@@ -25,26 +26,56 @@ class _EditPageState extends ModularState<EditPage, EditController> {
   FocusNode addressFocus;
   FocusNode commentaryFocus;
 
-  ImagePicker picker;
-
   @override
-  void initState() {
-    textControllerName = TextEditingController(text: controller.name);
-    textControllerCity = TextEditingController(text: controller.city);
-    textControllerState = TextEditingController(text: controller.state);
-    textControllerAddress = TextEditingController(text: controller.address);
-    textControllerCommentary =
-        TextEditingController(text: controller.commentary);
+  Widget build(BuildContext context) {
+    final width = ResponsiveWidget.contentWidth(context);
+    return ResponsivePage(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildImage(),
+            _buildActionButtons(),
+            const SizedBox(height: 10),
+            _buildTextName(),
+            Row(
+              children: [
+                Container(
+                  child: _buildTextCity(),
+                  width: width * .65,
+                ),
+                SizedBox(width: width * .01),
+                Expanded(
+                  child: _buildTextState(),
+                ),
+              ],
+            ),
+            _buildTextAddress(),
+            _buildTextCommentary(),
+            const SizedBox(height: 10),
+            _buildSaveButton(),
+          ],
+        ),
+      ),
+    );
+  }
 
-    nameFocus = FocusNode();
-    cityFocus = FocusNode();
-    stateFocus = FocusNode();
-    addressFocus = FocusNode();
-    commentaryFocus = FocusNode();
-
-    picker = ImagePicker();
-
-    super.initState();
+  Container _buildSaveButton() {
+    return Container(
+      height: 50,
+      child: Observer(
+        builder: (_) => ElevatedButton(
+          onPressed: controller.canSave ? controller.save : null,
+          style: ElevatedButton.styleFrom(
+            primary: Theme.of(context).accentColor,
+            onPrimary: Theme.of(context).cardColor,
+          ),
+          child: Text('Salvar'),
+        ),
+      ),
+    );
   }
 
   @override
@@ -65,77 +96,38 @@ class _EditPageState extends ModularState<EditPage, EditController> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        actions: [
-          Observer(
-            builder: (_) => FlatButton(
-              child: Text(
-                'Salvar',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Theme.of(context).appBarTheme.iconTheme.color,
-                ),
-              ),
-              onPressed: controller.canSave ? controller.save : null,
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 10),
-                _image(),
-                _buttons(),
-                const SizedBox(height: 10),
-                _buildTextName(),
-                Row(
-                  children: [
-                    Container(
-                      child: _buildTextCity(),
-                      width: MediaQuery.of(context).size.width * .65,
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * .01),
-                    Expanded(
-                      child: _buildTextState(),
-                    ),
-                  ],
-                ),
-                _buildTextAddress(),
-                _buildTextCommentary(),
-                const SizedBox(height: 10),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    textControllerName = TextEditingController(text: controller.name);
+    textControllerCity = TextEditingController(text: controller.city);
+    textControllerState = TextEditingController(text: controller.state);
+    textControllerAddress = TextEditingController(text: controller.address);
+    textControllerCommentary =
+        TextEditingController(text: controller.commentary);
+
+    nameFocus = FocusNode();
+    cityFocus = FocusNode();
+    stateFocus = FocusNode();
+    addressFocus = FocusNode();
+    commentaryFocus = FocusNode();
+
+    super.initState();
   }
 
-  Widget _buildTextName() {
+  Widget _buildTextAddress() {
     return TextFormField(
       keyboardType: TextInputType.text,
       maxLength: 500,
       maxLines: null,
-      controller: textControllerName,
+      controller: textControllerAddress,
       decoration: InputDecoration(
-        labelText: 'Nome',
+        labelText: 'Endereço',
         alignLabelWithHint: true,
       ),
       style: TextStyle(fontSize: 20.0),
-      onChanged: controller.setName,
-      focusNode: nameFocus,
-      onEditingComplete: () {
-        final newFocus = controller.name.isNotEmpty ? cityFocus : nameFocus;
-        FocusScope.of(context).requestFocus(newFocus);
-      },
+      onChanged: controller.setAddress,
+      focusNode: addressFocus,
+      onEditingComplete: () =>
+          FocusScope.of(context).requestFocus(commentaryFocus),
     );
   }
 
@@ -154,6 +146,44 @@ class _EditPageState extends ModularState<EditPage, EditController> {
       focusNode: cityFocus,
       onEditingComplete: () {
         final newFocus = controller.city.isNotEmpty ? stateFocus : cityFocus;
+        FocusScope.of(context).requestFocus(newFocus);
+      },
+    );
+  }
+
+  Widget _buildTextCommentary() {
+    return TextFormField(
+      keyboardType: TextInputType.text,
+      maxLines: null,
+      controller: textControllerCommentary,
+      decoration: InputDecoration(
+        labelText: 'Comentários',
+        alignLabelWithHint: true,
+      ),
+      style: TextStyle(fontSize: 20.0),
+      onChanged: controller.setCommentary,
+      focusNode: commentaryFocus,
+      onEditingComplete: () {
+        if (controller.canSave) controller.save();
+      },
+    );
+  }
+
+  Widget _buildTextName() {
+    return TextFormField(
+      keyboardType: TextInputType.text,
+      maxLength: 500,
+      maxLines: null,
+      controller: textControllerName,
+      decoration: InputDecoration(
+        labelText: 'Nome',
+        alignLabelWithHint: true,
+      ),
+      style: TextStyle(fontSize: 20.0),
+      onChanged: controller.setName,
+      focusNode: nameFocus,
+      onEditingComplete: () {
+        final newFocus = controller.name.isNotEmpty ? cityFocus : nameFocus;
         FocusScope.of(context).requestFocus(newFocus);
       },
     );
@@ -180,59 +210,42 @@ class _EditPageState extends ModularState<EditPage, EditController> {
     );
   }
 
-  Widget _buildTextAddress() {
-    return TextFormField(
-      keyboardType: TextInputType.text,
-      maxLength: 500,
-      maxLines: null,
-      controller: textControllerAddress,
-      decoration: InputDecoration(
-        labelText: 'Endereço',
-        alignLabelWithHint: true,
+  Widget _buildActionButtons() {
+    return Observer(
+      builder: (_) => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (controller.hasImage)
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () => controller.setImageFile(null),
+            ),
+          GestureDetector(
+            onTap: _pickFile,
+            child: IconButton(
+              icon: Icon(controller.hasImage ? Icons.edit : Icons.add_a_photo),
+              onPressed: _pickFile,
+            ),
+          ),
+        ],
       ),
-      style: TextStyle(fontSize: 20.0),
-      onChanged: controller.setAddress,
-      focusNode: addressFocus,
-      onEditingComplete: () =>
-          FocusScope.of(context).requestFocus(commentaryFocus),
     );
   }
 
-  Widget _buildTextCommentary() {
-    return TextFormField(
-      keyboardType: TextInputType.text,
-      maxLines: null,
-      controller: textControllerCommentary,
-      decoration: InputDecoration(
-        labelText: 'Comentários',
-        alignLabelWithHint: true,
-      ),
-      style: TextStyle(fontSize: 20.0),
-      onChanged: controller.setCommentary,
-      focusNode: commentaryFocus,
-      onEditingComplete: () {
-        if (controller.canSave) controller.save();
-      },
-    );
-  }
-
-  Widget _image() {
-    final w = MediaQuery.of(context).size.width;
+  Widget _buildImage() {
+    final w = ResponsiveWidget.contentWidth(context);
     final h = MediaQuery.of(context).size.height * .4;
 
     return Observer(
       builder: (_) {
-        if (controller.hasImage) {
+        if (controller.savedImage != null) {
           return Container(
-            child: controller.savedImage,
+            child: Image.memory(controller.savedImage),
             width: w,
             height: h,
           );
         } else {
           return Container(
-            decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(100)),
             width: 125,
             height: 125,
             child: Icon(
@@ -246,99 +259,29 @@ class _EditPageState extends ModularState<EditPage, EditController> {
     );
   }
 
-  Future getImage() async {
-    final pickedFile = await picker.getImage(
-      source: ImageSource.camera,
-      imageQuality: 50,
-    );
+  void _pickFile() async {
+    List<PlatformFile> _paths;
 
-    if (pickedFile != null) {
-      controller.setImageFile(File(pickedFile.path));
-    } else {
-      print('> no image selected.');
+    try {
+      _paths = (await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      ))
+          ?.files;
+    } on PlatformException catch (e) {
+      print("Unsupported operation: " + e.toString());
+    } catch (ex) {
+      print(ex);
     }
-  }
 
-  void _showPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) {
-        return SafeArea(
-          child: Container(
-            child: Wrap(
-              children: [
-                ListTile(
-                    leading: Icon(Icons.photo_library),
-                    title: Text('Galeria'),
-                    onTap: () {
-                      _imgFromGallery();
-                      Navigator.of(context).pop();
-                    }),
-                ListTile(
-                  leading: Icon(Icons.photo_camera),
-                  title: Text('Câmera'),
-                  onTap: () {
-                    _imgFromCamera();
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+    if (!mounted) return;
 
-  _imgFromCamera() async {
-    final pickedFile = await picker.getImage(
-      source: ImageSource.camera,
-      imageQuality: 50,
-      maxHeight: 2000,
-      maxWidth: 2000,
-    );
-
-    if (pickedFile != null) {
-      controller.setImageFile(File(pickedFile.path));
-    } else {
-      print('> no image selected.');
+    if (_paths != null) {
+      _paths.forEach((PlatformFile p) {
+        controller.setImageFile(p.bytes);
+        controller.setImagePath(p.path);
+        controller.setImage(p.bytes);
+      });
     }
-  }
-
-  _imgFromGallery() async {
-    final pickedFile = await picker.getImage(
-      source: ImageSource.gallery,
-      imageQuality: 50,
-      maxHeight: 600,
-      maxWidth: 600,
-    );
-
-    if (pickedFile != null) {
-      controller.setImageFile(File(pickedFile.path));
-    } else {
-      print('> no image selected.');
-    }
-  }
-
-  Widget _buttons() {
-    return Observer(
-      builder: (_) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (controller.hasImage)
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () => controller.setImageFile(null),
-            ),
-          GestureDetector(
-            onTap: () => _showPicker(context),
-            child: IconButton(
-              icon: Icon(controller.hasImage ? Icons.edit : Icons.add_a_photo),
-              onPressed: () => _showPicker(context),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
-import 'search_delegate/restaurant_search.dart';
-
 part 'restaurant_controller.g.dart';
 
 @Injectable()
@@ -17,22 +15,64 @@ class RestaurantController = _RestaurantControllerBase
     with _$RestaurantController;
 
 abstract class _RestaurantControllerBase with Store {
-  _RestaurantControllerBase() {
-    storage = Modular.get();
-    mediaStorage = Modular.get();
-    loadData();
-  }
-
   IMediaStorageRepository mediaStorage;
-  IStorageRepository storage;
 
-  RestaurantSearch searchDelegate;
+  IStorageRepository storage;
 
   @observable
   ObservableList<RestaurantModel> restaurants;
 
   @observable
   bool isLoading;
+
+  @observable
+  String filter = '';
+
+  _RestaurantControllerBase() {
+    storage = Modular.get();
+
+    mediaStorage = Modular.get();
+
+    loadData();
+  }
+
+  @action
+  Future<void> addRestaurant() async {
+    try {
+      if (kIsWeb || await CheckConnection.checkConnection())
+        Modular.to.pushNamed('/restaurants/edit', arguments: null);
+    } on PlatformException {
+      rethrow;
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  @action
+  Future<void> loadData() async {
+    isLoading = true;
+
+    restaurants = ObservableList<RestaurantModel>();
+
+    restaurants.addAll(await storage.getAllRestaurants());
+
+    restaurants
+        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    mediaStorage.loadCache();
+
+    isLoading = false;
+  }
+
+  @action
+  void showDetails(RestaurantModel restaurant) {
+    Modular.to.pushNamed('/restaurants/details', arguments: restaurant);
+  }
+
+  @action
+  void setFilter(String value) {
+    filter = value;
+  }
 
   @action
   void sortBy(SortBy value) {
@@ -49,42 +89,6 @@ abstract class _RestaurantControllerBase with Store {
       restaurants.sort((a, b) => a.registerDate.compareTo(b.registerDate));
     } else if (value == SortBy.NUM_REVIEWS) {
       restaurants.sort((a, b) => b.totalVisits.compareTo(a.totalVisits));
-    }
-  }
-
-  @action
-  Future<void> loadData() async {
-    isLoading = true;
-
-    print('load');
-
-    restaurants = ObservableList<RestaurantModel>();
-
-    restaurants.addAll(await storage.getAllRestaurants());
-    searchDelegate = RestaurantSearch(controller: this);
-
-    restaurants
-        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-
-    await mediaStorage.loadCache();
-
-    isLoading = false;
-  }
-
-  @action
-  void showDetails({@required RestaurantModel restaurant}) {
-    Modular.to.pushNamed('restaurant/details', arguments: restaurant);
-  }
-
-  @action
-  Future<void> addRestaurant() async {
-    try {
-      if (await CheckConnection.checkConnection())
-        Modular.to.pushNamed('restaurant/edit', arguments: null);
-    } on PlatformException {
-      rethrow;
-    } catch (error) {
-      print(error);
     }
   }
 }

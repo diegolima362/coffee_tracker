@@ -1,11 +1,10 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:coffee_tracker/app/modules/restaurant/restaurant_details/restaurant_details_controller.dart';
 import 'package:coffee_tracker/app/shared/models/restaurant_model.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/media_storage_repository_interface.dart';
 import 'package:coffee_tracker/app/shared/repositories/storage/interfaces/storage_repository_interface.dart';
 import 'package:coffee_tracker/app/utils/id_generator.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -60,16 +59,16 @@ abstract class _EditControllerBase with Store {
   }
 
   @observable
-  Image savedImage;
+  Uint8List savedImage;
 
   @observable
   String imagePath;
 
   @computed
-  bool get hasImage => imageFile != null || imagePath.isNotEmpty;
+  bool get hasImage => savedImage != null;
 
   @observable
-  File imageFile;
+  Uint8List imageFile;
 
   @observable
   RestaurantModel restaurant;
@@ -111,23 +110,23 @@ abstract class _EditControllerBase with Store {
   void setRestaurant(RestaurantModel value) => restaurant = value;
 
   @action
-  Future<void> setImage(Image value) async {
-    savedImage = value;
+  Future<void> setImage(Uint8List value) async {
+    savedImage = value != null && value.isNotEmpty ? value : null;
   }
 
   @action
-  void setImageFile(File value) {
+  void setImageFile(Uint8List value) {
     changedImage = true;
     if (imagePath.isNotEmpty && value == null) {
       imageFile = value;
       deletedImage = true;
       setRestaurantImage = false;
-      setImage(Image.asset('images/no-image.png'));
+      setImage(null);
       setImagePath('');
     } else {
       setRestaurantImage = true;
       imageFile = value;
-      setImage(Image.file(value));
+      setImage(value);
       setImagePath(_id);
     }
   }
@@ -150,13 +149,15 @@ abstract class _EditControllerBase with Store {
   Future<void> loadImage(String imageURL) async {
     if (imageURL.isEmpty) {
       setImagePath('');
-      setImage(Image.asset('images/no-image.png'));
+      setImage(null);
     } else {
-      await mediaStorage.loadCache();
+      mediaStorage.loadCache();
+
       setImage(await mediaStorage.fetchRestaurantImage(
         photoId: imageURL,
         restaurantId: restaurant.id,
       ));
+
       setImagePath(imageURL);
     }
   }
@@ -172,12 +173,14 @@ abstract class _EditControllerBase with Store {
         photoId: imagePath,
         restaurantId: _id,
       );
+
       r.imageURL = '';
     } else if (setRestaurantImage) {
       mediaStorage.persistRestaurantImage(
         restaurantId: _id,
         file: imageFile,
       );
+
       r.imageURL = _id;
     }
 
