@@ -65,9 +65,4 @@ app.*.map.json
 # Android Studio will place build artifacts here
 .gradle/6.1.1/vcsMetadata-1/
 
-# mobx
-
-*.g.dart
-
-
 pubspec.lock
