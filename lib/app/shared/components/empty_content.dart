@@ -18,11 +18,11 @@ class EmptyContent extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 32.0),
+            style: Theme.of(context).textTheme.headline6,
           ),
           Text(
             message,
-            style: TextStyle(fontSize: 16.0),
+            style: Theme.of(context).textTheme.caption,
           ),
         ],
       ),
