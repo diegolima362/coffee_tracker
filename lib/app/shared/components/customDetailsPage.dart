@@ -43,7 +43,7 @@ class ResponsivePage extends StatelessWidget {
           ),
           child: Text(
             'Coffee Tracker',
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headline6,
           ),
         ),
       ),
@@ -53,7 +53,7 @@ class ResponsivePage extends StatelessWidget {
           child: TextButton(
             child: Text(
               'Voltar',
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodyText2,
             ),
             onPressed: () => Modular.to.pop(),
           ),

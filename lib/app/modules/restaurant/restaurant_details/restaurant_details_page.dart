@@ -2,8 +2,6 @@ import 'package:coffee_tracker/app/shared/components/customDetailsPage.dart';
 import 'package:coffee_tracker/app/shared/components/responsive.dart';
 import 'package:coffee_tracker/app/shared/components/star_rating.dart';
 import 'package:coffee_tracker/app/utils/format.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -22,22 +20,11 @@ class _RestaurantDetailsPageState
     final RenderBox box = context.findRenderObject();
     final data = controller.shareData;
 
-    if (!kIsWeb) {
-      PlatformFile file = PlatformFile(bytes: controller.savedImage);
-
-      await Share.shareFiles(
-        [file.path],
-        text: data['text'],
-        subject: data['subject'],
-        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-      );
-    } else {
-      await Share.share(
-        data['text'],
-        subject: data['subject'],
-        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-      );
-    }
+    await Share.share(
+      data['text'],
+      subject: data['subject'],
+      sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+    );
   }
 
   @override

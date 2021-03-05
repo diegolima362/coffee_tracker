@@ -59,13 +59,10 @@ abstract class _EditControllerBase with Store {
   }
 
   @observable
-  Uint8List savedImage;
-
-  @observable
   String imagePath;
 
   @computed
-  bool get hasImage => savedImage != null;
+  bool get hasImage => imageFile != null;
 
   @observable
   Uint8List imageFile;
@@ -111,7 +108,7 @@ abstract class _EditControllerBase with Store {
 
   @action
   Future<void> setImage(Uint8List value) async {
-    savedImage = value != null && value.isNotEmpty ? value : null;
+    imageFile = value != null && value.isNotEmpty ? value : null;
   }
 
   @action

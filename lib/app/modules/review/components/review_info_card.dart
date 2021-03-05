@@ -13,7 +13,7 @@ class ReviewInfoCard extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(
-          review.restaurantName,
+          Format.capitalString(review.restaurantName),
           style: Theme.of(context).textTheme.bodyText1,
         ),
         subtitle: Text(

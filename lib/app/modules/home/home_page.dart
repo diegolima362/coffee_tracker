@@ -158,7 +158,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
         ),
         child: Text(
           'Coffee Tracker',
-          style: Theme.of(context).textTheme.headline5,
+          style: Theme.of(context).textTheme.headline6,
         ),
       ),
       automaticallyImplyLeading: false,

@@ -20,13 +20,13 @@ class CustomAddButton extends StatelessWidget {
         children: [
           Icon(
             Icons.add,
-            color: Theme.of(context).textTheme.caption.color,
+            color: Theme.of(context).textTheme.bodyText2.color,
             size: 12,
           ),
           if (!_isSmall)
             Text(
               'Adicionar',
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodyText2,
             ),
         ],
       ),

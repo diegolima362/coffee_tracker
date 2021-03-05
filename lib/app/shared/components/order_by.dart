@@ -18,7 +18,7 @@ class OrderBy<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _isSmall = ResponsiveWidget.isSmallScreen(context);
-    final _color = Theme.of(context).textTheme.caption.color;
+    final _color = Theme.of(context).textTheme.bodyText2.color;
 
     return PopupMenuButton<T>(
       tooltip: 'Ordenar',
@@ -28,7 +28,7 @@ class OrderBy<T> extends StatelessWidget {
               children: [
                 Text(
                   'Ordenar',
-                  style: Theme.of(context).textTheme.caption,
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
                 Icon(
                   Icons.arrow_drop_down,

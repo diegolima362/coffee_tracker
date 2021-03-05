@@ -98,7 +98,10 @@ class _RestaurantPageState
             expanded: true,
             width: w,
             height: w * .6,
-            onTap: () => controller.showDetails(restaurant),
+            onTap: () {
+              FocusScope.of(context).unfocus();
+              controller.showDetails(restaurant);
+            },
           );
         },
       );

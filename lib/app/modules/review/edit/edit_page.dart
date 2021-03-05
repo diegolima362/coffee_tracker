@@ -55,6 +55,7 @@ class _EditPageState extends ModularState<EditPage, EditController> {
             _buildText(),
             const SizedBox(height: 20.0),
             _buildSaveButton(),
+            const SizedBox(height: 10),
           ],
         ),
       ),

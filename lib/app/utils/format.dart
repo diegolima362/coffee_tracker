@@ -47,4 +47,18 @@ class Format {
   static String simpleDate(DateTime date) {
     return DateFormat.yMd('pt_Br').format(date);
   }
+
+  static bool isEmail(String string) {
+    if (string == null || string.isEmpty) {
+      return true;
+    }
+
+    const pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+    final regExp = RegExp(pattern);
+
+    if (!regExp.hasMatch(string)) {
+      return false;
+    }
+    return true;
+  }
 }

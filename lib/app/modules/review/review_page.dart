@@ -45,7 +45,7 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
     } else if (controller.reviews.isEmpty) {
       return EmptyContent(
         title: 'Nada por aqui',
-        message: 'Sem Reviews Registradas',
+        message: 'Sem Reviews Registradas!',
       );
     } else {
       final reviews = controller.reviews
@@ -69,7 +69,10 @@ class _ReviewPageState extends ModularState<ReviewPage, ReviewController> {
 
           return ReviewInfoCard(
             review: review,
-            onTap: () => controller.showDetails(review),
+            onTap: () {
+              FocusScope.of(context).unfocus();
+              controller.showDetails(review);
+            },
           );
         },
       );

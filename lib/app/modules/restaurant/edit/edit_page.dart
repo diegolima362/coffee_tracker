@@ -1,10 +1,10 @@
 import 'package:coffee_tracker/app/shared/components/customDetailsPage.dart';
 import 'package:coffee_tracker/app/shared/components/responsive.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'edit_controller.dart';
 
@@ -56,6 +56,7 @@ class _EditPageState extends ModularState<EditPage, EditController> {
             _buildTextCommentary(),
             const SizedBox(height: 10),
             _buildSaveButton(),
+            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -238,9 +239,9 @@ class _EditPageState extends ModularState<EditPage, EditController> {
 
     return Observer(
       builder: (_) {
-        if (controller.savedImage != null) {
+        if (controller.imageFile != null) {
           return Container(
-            child: Image.memory(controller.savedImage),
+            child: Image.memory(controller.imageFile),
             width: w,
             height: h,
           );
@@ -260,28 +261,16 @@ class _EditPageState extends ModularState<EditPage, EditController> {
   }
 
   void _pickFile() async {
-    List<PlatformFile> _paths;
+    final ImagePicker _picker = ImagePicker();
 
     try {
-      _paths = (await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      ))
-          ?.files;
-    } on PlatformException catch (e) {
-      print("Unsupported operation: " + e.toString());
-    } catch (ex) {
-      print(ex);
-    }
+      final pickedFile =
+          await (await _picker.getImage(source: ImageSource.gallery))
+              .readAsBytes();
 
-    if (!mounted) return;
-
-    if (_paths != null) {
-      _paths.forEach((PlatformFile p) {
-        controller.setImageFile(p.bytes);
-        controller.setImagePath(p.path);
-        controller.setImage(p.bytes);
-      });
+      controller.setImageFile(pickedFile);
+    } catch (e) {
+      print(e);
     }
   }
 }

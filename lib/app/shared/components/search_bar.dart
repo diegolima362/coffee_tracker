@@ -27,7 +27,7 @@ class _SearchBarState extends State<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = Theme.of(context).textTheme.caption.color;
+    final activeColor = Theme.of(context).textTheme.bodyText2.color;
 
     final isSmall = ResponsiveWidget.isSmallScreen(context);
 
@@ -44,11 +44,9 @@ class _SearchBarState extends State<SearchBar> {
       return Padding(
         padding: const EdgeInsets.all(2.0),
         child: Container(
-          height: 30.0,
+          height: 50.0,
           width: w,
           child: TextField(
-            textAlignVertical: TextAlignVertical.top,
-            autofocus: isSmall,
             controller: _controller,
             onChanged: widget.onChanged,
             decoration: InputDecoration(

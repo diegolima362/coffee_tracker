@@ -1,8 +1,8 @@
 import 'package:coffee_tracker/app/shared/auth/auth_controller.dart';
+import 'package:coffee_tracker/app/utils/format.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
-import 'package:validators/validators.dart';
 
 part 'login_controller.g.dart';
 
@@ -58,7 +58,7 @@ abstract class _LoginControllerBase with Store {
       email.isNotEmpty && password.isNotEmpty && !error.hasErrors && !loading;
 
   @computed
-  bool get isEmailValid => email != null && isEmail(email);
+  bool get isEmailValid => email != null && Format.isEmail(email);
 
   bool get isEmailVerified => auth.isEmailVerified;
 
@@ -186,12 +186,12 @@ abstract class _LoginControllerBase with Store {
 
   @action
   void validateEmail(String value) {
-    error.email = isEmail(value) ? null : 'Email inválido';
+    error.email = Format.isEmail(value) ? null : 'Email inválido';
   }
 
   @action
   void validatePassword(String value) {
-    error.password = isNull(value) || value.isEmpty || value.length < 6
+    error.password = value == null || value.isEmpty || value.length < 6
         ? 'Senha deve ter pelo menos seis caracteres'
         : null;
   }
